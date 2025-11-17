@@ -1,3 +1,6 @@
+// SOAP client for XML-based web service communication.
+// Relates to: auth_remote_datasource.dart, network_info.dart
+
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:developer' as developer;

@@ -1,3 +1,6 @@
+// Exception classes for different error scenarios.
+// Relates to: failures.dart, auth_remote_datasource.dart
+
 class ServerException implements Exception {
   final String message;
 

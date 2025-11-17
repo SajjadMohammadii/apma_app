@@ -1,3 +1,6 @@
+// Application text and string constants.
+// Relates to: login_page.dart, splash_screen.dart, UI screens
+
 class AppStrings {
   // App
   static const String appName = 'Apmaco';

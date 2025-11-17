@@ -1,3 +1,6 @@
+// Authentication states representing different auth stages.
+// Relates to: auth_bloc.dart, auth_event.dart, login_page.dart
+
 import 'package:apma_app/features/auth/domain/entities/user.dart';
 import 'package:equatable/equatable.dart';
 

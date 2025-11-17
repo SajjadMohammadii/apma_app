@@ -1,3 +1,6 @@
+//Application color palette constants.
+// Relates to: app_theme.dart, UI components
+
 import 'package:flutter/material.dart';
 
 class AppColors {

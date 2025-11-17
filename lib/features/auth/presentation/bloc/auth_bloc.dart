@@ -1,3 +1,6 @@
+// BLoC managing authentication state and business logic.
+// Relates to: auth_event.dart, auth_state.dart, login_usecase.dart, auth_repository.dart, local_storage_service.dart
+
 import 'package:apma_app/core/errors/failures.dart';
 import 'package:apma_app/core/services/local_storage_service.dart';
 import 'package:apma_app/features/auth/data/models/user_model.dart';
@@ -9,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+// Handles authentication events and emits corresponding states.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase? loginUseCase;
   final AuthRepository? repository;
@@ -25,6 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AutoLoginEvent>(_onAutoLogin);
   }
 
+  // Handles manual login with save password dialog.
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
 
@@ -58,6 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Handles automatic login without save password dialog.
   Future<void> _onAutoLogin(
     AutoLoginEvent event,
     Emitter<AuthState> emit,
@@ -94,6 +100,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Handles user logout and clears session.
   Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     try {
@@ -107,6 +114,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Checks authentication status on app start
   Future<void> _onCheckAuthStatus(
     CheckAuthStatusEvent event,
     Emitter<AuthState> emit,

@@ -1,3 +1,6 @@
+// Reusable ApmaCo logo widget.
+// Relates to: login_page.dart, splash_screen.dart
+
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 

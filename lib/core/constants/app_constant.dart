@@ -1,3 +1,6 @@
+// Application-wide constant values and configurations.
+// Relates to: app_string.dart, soap_client.dart
+
 class AppConstants {
   // Durations
   static const Duration splashDuration = Duration(seconds: 3);

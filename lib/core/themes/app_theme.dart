@@ -1,3 +1,6 @@
+// Application theme configuration for Material Design.
+// Relates to: main.dart, app_colors.dart
+
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/constants/app_constant.dart';
 import 'package:flutter/material.dart';

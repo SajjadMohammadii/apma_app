@@ -1,3 +1,6 @@
+// Dialog for saving user credentials locally.
+// Relates to: login_page.dart, local_storage_service.dart
+
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/constants/app_constant.dart';
 import 'package:flutter/material.dart';

@@ -1,3 +1,6 @@
+// Dependency injection setup using GetIt service locator.
+// Relates to: main.dart, auth_bloc.dart, all repositories and use cases
+
 import 'package:apma_app/core/network/soap_client.dart';
 import 'package:apma_app/core/services/local_storage_service.dart';
 import 'package:apma_app/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -32,7 +35,7 @@ Future<void> init() async {
     () => AuthRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // Data sources - استفاده از سرور SOAP واقعی
+  // Data sources -use soap
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(soapClient: sl()),
   );

@@ -1,3 +1,6 @@
+// Login screen UI with form validation and authentication.
+// Relates to: auth_bloc.dart, input_validator.dart, home_page.dart
+
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/constants/app_constant.dart';
 import 'package:apma_app/core/constants/app_string.dart';

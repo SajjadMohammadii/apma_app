@@ -1,3 +1,6 @@
+// Initial splash screen with app initialization.
+// Relates to: main.dart, login_page.dart, home_page.dart
+
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/constants/app_constant.dart';
 import 'package:apma_app/core/di/injection_container.dart';

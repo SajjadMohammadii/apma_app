@@ -1,3 +1,6 @@
+// Failure classes for error handling across the app.
+// Relates to: exceptions.dart, auth_repository.dart, auth_bloc.dart
+
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {

@@ -1,3 +1,6 @@
+// Input validation utilities for forms.
+// Relates to: login_page.dart, registration forms
+
 class InputValidator {
   static bool isValidUsername(String username) {
     if (username.isEmpty) return false;

@@ -1,5 +1,9 @@
+// Data model extending User entity with serialization capabilities.
+// Relates to: user.dart, auth_remote_datasource.dart, auth_repository_impl.dart
+
 import 'package:apma_app/features/auth/domain/entities/user.dart';
 
+// User data model with JSON/XML serialization for API integration.
 class UserModel extends User {
   final String? token;
 
@@ -12,7 +16,7 @@ class UserModel extends User {
     this.token,
   });
 
-  /// از JSON
+  // Deserializes user from JSON response.
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? '',
@@ -24,7 +28,7 @@ class UserModel extends User {
     );
   }
 
-  /// به JSON
+  // Serializes user to JSON format.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -36,7 +40,7 @@ class UserModel extends User {
     };
   }
 
-  /// از XML (برای SOAP)
+  // Deserializes user from XML SOAP response.
   factory UserModel.fromXml(Map<String, String> xmlData) {
     return UserModel(
       id: xmlData['UserId'] ?? xmlData['id'] ?? '',
@@ -48,7 +52,7 @@ class UserModel extends User {
     );
   }
 
-  /// کپی با تغییرات
+  // Creates a copy with modified fields.
   UserModel copyWith({
     String? id,
     String? username,

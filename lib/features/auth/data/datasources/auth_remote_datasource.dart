@@ -1,3 +1,6 @@
+// Remote data source for authentication API calls.
+// Relates to: auth_repository_impl.dart, soap_client.dart, user_model.dart
+
 import 'dart:convert';
 import 'dart:developer' as developer;
 

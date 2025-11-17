@@ -1,3 +1,6 @@
+// Implementation of AuthRepository with remote and local data sources.
+// Relates to: auth_repository.dart, auth_remote_datasource.dart, network_info.dart
+
 import 'package:apma_app/core/errors/exceptions.dart';
 import 'package:apma_app/core/errors/failures.dart';
 import 'package:apma_app/features/auth/data/datasources/auth_remote_datasource.dart';

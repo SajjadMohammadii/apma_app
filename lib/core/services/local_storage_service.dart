@@ -1,3 +1,6 @@
+// Service for persistent local data storage and session management.
+// Relates to: auth_bloc.dart, login_page.dart
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {

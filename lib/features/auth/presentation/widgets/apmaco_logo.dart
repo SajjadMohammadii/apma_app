@@ -1,3 +1,6 @@
+// ApmaCo logo widget for authentication screens.
+// Relates to: login_page.dart, core/widgets/apmaco_logo.dart
+
 import 'package:flutter/material.dart';
 
 class ApmacoLogo extends StatelessWidget {
