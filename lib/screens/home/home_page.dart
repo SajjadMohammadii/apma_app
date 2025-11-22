@@ -4,15 +4,21 @@ import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:apma_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:apma_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:apma_app/screens/auth/login_page.dart';
+import 'package:apma_app/screens/transaction/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String username;
   final String? name;
 
   const HomePage({super.key, required this.username, this.name});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -30,18 +36,28 @@ class HomePage extends StatelessWidget {
           centerTitle: true,
           elevation: 0,
           backgroundColor: AppColors.primaryGreen,
-          automaticallyImplyLeading: false, // غیرفعال کردن آیکون پیش‌فرض
+          automaticallyImplyLeading: false,
           leading: IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.message_outlined, size: 24),
             onPressed: () {
-              // TODO: Notifications
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('صفحه پیام‌ها')));
             },
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined, size: 24),
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('اعلان‌ها')));
+              },
+            ),
             Builder(
               builder:
                   (context) => IconButton(
-                    icon: const Icon(Icons.menu),
+                    icon: const Icon(Icons.menu, size: 24),
                     onPressed: () {
                       Scaffold.of(context).openEndDrawer();
                     },
@@ -55,14 +71,7 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.paddingMedium),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // User Info Card
-                _buildUserCard(context),
-
-                const SizedBox(height: 20),
-
-                const SizedBox(height: 20),
-              ],
+              children: [_buildUserCard(context), const SizedBox(height: 20)],
             ),
           ),
         ),
@@ -81,20 +90,20 @@ class HomePage extends StatelessWidget {
             children: [
               DrawerHeader(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primaryGreen, AppColors.primaryOrange],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 35,
                       backgroundColor: Colors.white,
-                      child: Icon(
+                      child: const Icon(
                         Icons.person,
                         size: 40,
                         color: AppColors.primaryGreen,
@@ -103,7 +112,7 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Flexible(
                       child: Text(
-                        name ?? username,
+                        widget.name ?? widget.username,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -115,7 +124,7 @@ class HomePage extends StatelessWidget {
                     ),
                     Flexible(
                       child: Text(
-                        '@$username',
+                        '@${widget.username}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -127,43 +136,55 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              _buildDrawerItem(
+              _buildDrawerItemWithImage(
                 context,
-                icon: Icons.home,
+                imagePath: 'assets/images/home.png',
                 title: 'صفحه اصلی',
                 onTap: () => Navigator.pop(context),
               ),
-              _buildDrawerItem(
+              _buildDrawerItemWithImage(
                 context,
-                icon: Icons.person,
-                title: 'پروفایل',
+                imagePath: 'assets/images/information.png',
+                title: 'اطلاعات پایه',
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Navigate to profile
                 },
               ),
-              _buildDrawerItem(
+
+              _buildDrawerItemWithImage(
                 context,
-                icon: Icons.settings,
+                imagePath: 'assets/images/transaction.png',
+                title: 'عملیات',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TransactionPage(),
+                    ),
+                  );
+                },
+              ),
+              _buildDrawerItemWithImage(
+                context,
+                imagePath: 'assets/images/reports.png',
+                title: 'گزارش ها',
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              _buildDrawerItemWithImage(
+                context,
+                imagePath: 'assets/images/setting.png',
                 title: 'تنظیمات',
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Navigate to settings
-                },
-              ),
-              _buildDrawerItem(
-                context,
-                icon: Icons.help_outline,
-                title: 'راهنما',
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Navigate to help
                 },
               ),
               const Divider(),
-              _buildDrawerItem(
+              _buildDrawerItemWithImage(
                 context,
-                icon: Icons.logout,
+                imagePath: 'assets/images/logout.png',
                 title: 'خروج',
                 color: AppColors.error,
                 onTap: () {
@@ -177,15 +198,20 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerItem(
+  Widget _buildDrawerItemWithImage(
     BuildContext context, {
-    required IconData icon,
+    required String imagePath,
     required String title,
     required VoidCallback onTap,
     Color? color,
   }) {
     return ListTile(
-      leading: Icon(icon, color: color ?? AppColors.textPrimary),
+      leading: Image.asset(
+        imagePath,
+        width: 24,
+        height: 24,
+        color: color ?? AppColors.textPrimary,
+      ),
       title: Text(
         title,
         style: TextStyle(
@@ -203,73 +229,97 @@ class HomePage extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primaryGreen, AppColors.primaryOrange],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
         ),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGreen.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
+          const Text(
+            'خوش آمدید!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Vazir',
+            ),
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white,
-                child: Icon(
-                  Icons.person,
-                  size: 35,
-                  color: AppColors.primaryGreen,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Color(0xFF0095F6),
+                      size: 10,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    widget.name ?? widget.username,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Vazir',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'خوش آمدید',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      name ?? username,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 4),
+              const Text(
+                'نقش سازمانی',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontFamily: 'Vazir',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 15),
+          const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.verified_user, color: Colors.white, size: 16),
-                SizedBox(width: 5),
-                Text(
-                  'کاربر فعال',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
+            ),
+            child: CircleAvatar(
+              radius: 32,
+              backgroundColor: Colors.white,
+              child: const Icon(
+                Icons.person,
+                size: 36,
+                color: AppColors.primaryPurple,
+              ),
             ),
           ),
         ],
