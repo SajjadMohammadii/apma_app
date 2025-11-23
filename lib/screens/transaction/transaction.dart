@@ -1,6 +1,6 @@
 import 'package:apma_app/core/constants/app_colors.dart';
+import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
 import 'package:flutter/material.dart';
-import 'package:apma_app/screens/transaction/price_management.dart';
 
 class TransactionPage extends StatelessWidget {
   const TransactionPage({super.key});
