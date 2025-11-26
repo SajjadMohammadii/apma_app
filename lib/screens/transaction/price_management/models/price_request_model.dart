@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 class PriceRequestModel {
   final String orderID;
   final String orderDate;
@@ -60,8 +62,8 @@ class PriceRequestModel {
       confirmationStatus:
           json['ConfirmationStatus'] is int
               ? json['ConfirmationStatus']
-              : int.tryParse(json['ConfirmationStatus']?.toString() ?? '1') ??
-                  1,
+              : int.tryParse(json['ConfirmationStatus']?.toString() ?? '0') ??
+                  0, // تغییر از 1 به 0 تا متوجه بشویم کی null است
       title: json['Title']?.toString() ?? '',
       kindID: json['KindID']?.toString() ?? '',
       currentPrice:
@@ -107,8 +109,6 @@ class PriceRequestModel {
 
   String get statusString {
     switch (confirmationStatus) {
-      case 0:
-        return 'در حال بررسی'; // یا می‌توانید 'ثبت شده' استفاده کنید
       case 1:
         return 'در حال بررسی';
       case 2:
@@ -116,7 +116,9 @@ class PriceRequestModel {
       case 3:
         return 'رد شده';
       default:
-        return 'در حال بررسی'; // به جای "نامشخص" از حالت پیش‌فرض معقول استفاده می‌کنیم
+        // اگر status ناشناخته بود، مقدار واقعی را هم لاگ کن
+        developer.log('⚠️ Status ناشناخته: $confirmationStatus');
+        return 'نامشخص';
     }
   }
 

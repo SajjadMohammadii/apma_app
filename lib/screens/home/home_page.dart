@@ -25,6 +25,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  String _selectedCategory = 'مالی';
+
+  final List<String> _categories = [
+    'مالی',
+    'تولید',
+    'ارتباط با مشتری',
+    'پرسنلی',
+    'تسهیل دار',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +48,129 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
-          title: const Text('پنل کاربری'),
+          title: Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Container(
+              height: 32,
+              padding: const EdgeInsets.only(left: 4, right: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedCategory,
+                  dropdownColor: Colors.white,
+                  isDense: true,
+                  icon: const SizedBox.shrink(),
+                  alignment: AlignmentDirectional.centerEnd,
+                  style: const TextStyle(
+                    fontFamily: 'Vazir',
+                    fontSize: 11,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  selectedItemBuilder: (BuildContext context) {
+                    return _categories.map((String value) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            value,
+                            style: const TextStyle(
+                              fontFamily: 'Vazir',
+                              fontSize: 11,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.primaryPurple,
+                            size: 18,
+                          ),
+                        ],
+                      );
+                    }).toList();
+                  },
+                  items:
+                      _categories.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            value,
+                            style: const TextStyle(
+                              fontFamily: 'Vazir',
+                              fontSize: 11,
+                            ),
+                            textDirection: TextDirection.rtl,
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedCategory = newValue;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
           centerTitle: true,
           elevation: 0,
           backgroundColor: AppColors.primaryGreen,
           automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: const Icon(Icons.message_outlined, size: 24),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MessagesPage()),
-              );
-            },
+          leading: Row(
+            children: [
+              Expanded(
+                child: IconButton(
+                  icon: const Icon(Icons.message_outlined, size: 24),
+                  padding: EdgeInsets.only(left: 6),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MessagesPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_outlined, size: 24),
+                  padding: EdgeInsets.only(left: 4),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined, size: 24),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationsPage(),
+            const Padding(
+              padding: EdgeInsets.only(left: 4),
+              child: Center(
+                child: Text(
+                  'پنل کاربری',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Vazir',
+                    fontWeight: FontWeight.bold,
                   ),
-                );
-              },
+                ),
+              ),
             ),
             Builder(
               builder:
@@ -568,12 +675,19 @@ class _HomePageState extends State<HomePage> {
                 title: 'عملیات',
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TransactionPage(),
-                    ),
-                  );
+                  if (_selectedCategory == 'مالی' ||
+                      _selectedCategory == 'تسهیل دار') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                TransactionPage(category: _selectedCategory),
+                      ),
+                    );
+                  } else {
+                    _showEmptyCategoryDialog(context);
+                  }
                 },
               ),
               _buildDrawerItemWithImage(
@@ -746,6 +860,32 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showEmptyCategoryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              title: const Text(
+                'محتوایی موجود نیست',
+                style: TextStyle(fontFamily: 'Vazir'),
+              ),
+              content: Text(
+                'در حال حاضر محتوایی برای دسته‌بندی "$_selectedCategory" در بخش عملیات موجود نیست.',
+                style: const TextStyle(fontFamily: 'Vazir'),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('متوجه شدم'),
+                ),
+              ],
+            ),
+          ),
     );
   }
 

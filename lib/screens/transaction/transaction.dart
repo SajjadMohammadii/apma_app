@@ -1,9 +1,12 @@
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
+import 'package:apma_app/screens/bankcheck/bankcheck.dart';
 import 'package:flutter/material.dart';
 
 class TransactionPage extends StatelessWidget {
-  const TransactionPage({super.key});
+  final String category;
+
+  const TransactionPage({super.key, this.category = 'مالی'});
 
   @override
   Widget build(BuildContext context) {
@@ -20,85 +23,121 @@ class TransactionPage extends StatelessWidget {
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
           centerTitle: true,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildMenuItem(
-                context,
-                title: 'مدیریت بها',
-                imagePath: 'assets/images/PriceManagement.png',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PriceManagementPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+          child: _buildCategoryContent(),
         ),
       ),
     );
   }
 
-  Widget _buildMenuItem(
-    BuildContext context, {
-    required String title,
-    required String imagePath,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
-            begin: Alignment.centerRight,
-            end: Alignment.centerLeft,
+  Widget _buildCategoryContent() {
+    if (category == 'مالی') {
+      return Column(
+        children: [
+          _buildMenuItem(
+            title: 'مدیریت بها',
+            imagePath: 'assets/images/PriceManagement.png',
           ),
+        ],
+      );
+    } else if (category == 'تسهیل دار') {
+      return Column(
+        children: [
+          _buildMenuItem(title: 'چک', imagePath: 'assets/images/bankcheck.png'),
+        ],
+      );
+    } else {
+      return const Center(
+        child: Text(
+          'محتوایی موجود نیست',
+          style: TextStyle(
+            fontFamily: 'Vazir',
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildMenuItem({required String title, required String imagePath}) {
+    return Builder(
+      builder: (context) {
+        return InkWell(
+          onTap: () {
+            if (title == 'مدیریت بها') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PriceManagementPage(),
+                ),
+              );
+            } else if (title == 'چک') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BankCheckPage()),
+              );
+            }
+          },
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Vazir',
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
+                begin: Alignment.centerRight,
+                end: Alignment.centerLeft,
               ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            const SizedBox(width: 140),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Image.asset(
-                imagePath,
-                width: 40,
-                height: 40,
-                fit: BoxFit.contain,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Vazir',
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  width: 64,
+                  height: 64,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Image.asset(
+                    imagePath,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

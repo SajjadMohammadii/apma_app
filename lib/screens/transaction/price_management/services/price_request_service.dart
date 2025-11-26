@@ -78,6 +78,27 @@ class PriceRequestService {
 
       developer.log('✅ ${detailsList.length} مورد دریافت شد');
 
+      // 🔍 DEBUG: بررسی ConfirmationStatus های واقعی
+      final statusCounts = <int, int>{};
+      for (var item in detailsList) {
+        final status = item['ConfirmationStatus'];
+        developer.log(
+          '🔍 DEBUG - ID: ${item['ID']}, ConfirmationStatus: $status (type: ${status.runtimeType})',
+        );
+
+        // شمارش هر status
+        final statusInt =
+            status is int
+                ? status
+                : int.tryParse(status?.toString() ?? '0') ?? 0;
+        statusCounts[statusInt] = (statusCounts[statusInt] ?? 0) + 1;
+      }
+
+      developer.log('📊 خلاصه وضعیت‌ها:');
+      statusCounts.forEach((status, count) {
+        developer.log('   Status $status: $count مورد');
+      });
+
       return detailsList
           .map(
             (json) => PriceRequestModel.fromJson(json as Map<String, dynamic>),

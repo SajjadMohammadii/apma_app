@@ -28,7 +28,7 @@ class PriceManagementPage extends StatefulWidget {
 }
 
 class _PriceManagementPageState extends State<PriceManagementPage> {
-  String selectedStatus = 'همه';
+  String selectedStatus = 'در حال بررسی';
   Map<String, String> subFieldStatuses = {};
   final List<String> statusOptions = [
     'همه',

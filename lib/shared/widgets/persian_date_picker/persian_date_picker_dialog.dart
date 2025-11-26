@@ -60,19 +60,26 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: 340,
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              _buildHeader(),
-              const SizedBox(height: 6),
-              _buildWeekDays(),
-              const Divider(height: 12),
-              _buildCalendar(),
-              const SizedBox(height: 16),
-              _buildButtons(),
-            ],
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+                  _buildHeader(),
+                  const SizedBox(height: 4),
+                  _buildWeekDays(),
+                  const Divider(height: 8),
+                  _buildCalendar(),
+                  const SizedBox(height: 12),
+                  _buildButtons(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -178,6 +185,9 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                 Jalali.now().month == selectedDate.month &&
                 Jalali.now().day == day;
 
+            // تشخیص جمعه: ستون آخر (index % 7 == 6) یعنی جمعه
+            final isFriday = index % 7 == 6;
+
             return Material(
               color: Colors.transparent,
               child: InkWell(
@@ -195,7 +205,12 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                   decoration: BoxDecoration(
                     color:
                         isSelected
-                            ? AppColors.primaryGreen
+                            ? AppColors
+                                .primaryGreen // اگر انتخاب شده → سبز
+                            : isFriday
+                            ? Colors
+                                .red
+                                .shade50 // اگر جمعه باشد → قرمز روشن
                             : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border:
@@ -203,6 +218,12 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                             ? Border.all(
                               color: AppColors.primaryGreen,
                               width: 2,
+                            )
+                            : isFriday && !isSelected
+                            ? Border.all(
+                              color:
+                                  Colors.red.shade200, // border قرمز برای جمعه
+                              width: 1,
                             )
                             : null,
                   ),
@@ -217,6 +238,10 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                                 ? Colors.white
                                 : isToday
                                 ? AppColors.primaryGreen
+                                : isFriday
+                                ? Colors
+                                    .red
+                                    .shade700 // متن قرمز برای جمعه
                                 : Colors.black87,
                         fontWeight:
                             isSelected || isToday
@@ -235,53 +260,103 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
   }
 
   Widget _buildButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        // دکمه "امروز" - کوچک و فشرده
+        Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.primaryPurple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: AppColors.primaryPurple.withOpacity(0.3),
+                width: 1,
               ),
-              side: BorderSide(color: Colors.grey.shade400),
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              minimumSize: const Size(0, 32),
             ),
-            child: const Text(
-              'انصراف',
-              style: TextStyle(fontFamily: 'Vazir', fontSize: 12),
+            child: TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  selectedDate = Jalali.now();
+                });
+              },
+              icon: const Icon(
+                Icons.today,
+                size: 14,
+                color: AppColors.primaryPurple,
+              ),
+              label: const Text(
+                'امروز',
+                style: TextStyle(
+                  fontFamily: 'Vazir',
+                  fontSize: 11,
+                  color: AppColors.primaryPurple,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              String formatted =
-                  '${selectedDate.year}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.day.toString().padLeft(2, '0')}';
-              widget.onDateSelected(formatted);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-              backgroundColor: AppColors.primaryGreen,
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              minimumSize: const Size(0, 32),
-            ),
-            child: const Text(
-              'تأیید',
-              style: TextStyle(
-                fontFamily: 'Vazir',
-                fontSize: 12,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        const SizedBox(height: 4),
+        // دکمه‌های انصراف و تأیید
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  side: BorderSide(color: Colors.grey.shade400),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  minimumSize: const Size(0, 32),
+                ),
+                child: const Text(
+                  'انصراف',
+                  style: TextStyle(fontFamily: 'Vazir', fontSize: 12),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  String formatted =
+                      '${selectedDate.year}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.day.toString().padLeft(2, '0')}';
+                  widget.onDateSelected(formatted);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  backgroundColor: AppColors.primaryGreen,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  minimumSize: const Size(0, 32),
+                ),
+                child: const Text(
+                  'تأیید',
+                  style: TextStyle(
+                    fontFamily: 'Vazir',
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
