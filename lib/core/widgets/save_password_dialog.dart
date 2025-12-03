@@ -68,7 +68,6 @@ class _SavePasswordDialogState extends State<SavePasswordDialog> {
 
             const SizedBox(height: 24),
 
-            // دکمه‌ها
             Row(
               children: [
                 // دکمه نه
@@ -101,7 +100,6 @@ class _SavePasswordDialogState extends State<SavePasswordDialog> {
 
                 const SizedBox(width: 12),
 
-                // دکمه بله
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {

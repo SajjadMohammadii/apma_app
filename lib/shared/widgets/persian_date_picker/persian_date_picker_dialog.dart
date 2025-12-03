@@ -184,8 +184,6 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                 Jalali.now().year == selectedDate.year &&
                 Jalali.now().month == selectedDate.month &&
                 Jalali.now().day == day;
-
-            // تشخیص جمعه: ستون آخر (index % 7 == 6) یعنی جمعه
             final isFriday = index % 7 == 6;
 
             return Material(
@@ -263,7 +261,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // دکمه "امروز" - کوچک و فشرده
+        // دکمه "امروز"
         Align(
           alignment: Alignment.centerRight,
           child: Container(

@@ -1,6 +1,9 @@
 import 'package:apma_app/core/constants/app_colors.dart';
+import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart';
+import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart';
 import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
-import 'package:apma_app/screens/bankcheck/bankcheck.dart';
+import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart';
+
 import 'package:flutter/material.dart';
 
 class TransactionPage extends StatelessWidget {
@@ -53,6 +56,20 @@ class TransactionPage extends StatelessWidget {
       return Column(
         children: [
           _buildMenuItem(title: 'چک', imagePath: 'assets/images/bankcheck.png'),
+          const SizedBox(height: 16),
+          _buildMenuItem(
+            title: 'تحویل مرسولات',
+            imagePath: 'assets/images/delivery.png',
+          ),
+        ],
+      );
+    } else if (category == 'پرسنلی') {
+      return Column(
+        children: [
+          _buildMenuItem(
+            title: 'ورود و خروج',
+            imagePath: 'assets/images/EntryExit.png',
+          ),
         ],
       );
     } else {
@@ -85,6 +102,18 @@ class TransactionPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const BankCheckPage()),
+              );
+            } else if (title == 'ورود و خروج') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EntryExitPage()),
+              );
+            } else if (title == 'تحویل مرسولات') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DeliveryParcelsPage(),
+                ),
               );
             }
           },
@@ -131,6 +160,13 @@ class TransactionPage extends StatelessWidget {
                     width: 40,
                     height: 40,
                     fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.white54,
+                        size: 40,
+                      );
+                    },
                   ),
                 ),
               ],

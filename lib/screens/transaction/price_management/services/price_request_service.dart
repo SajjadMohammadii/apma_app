@@ -78,7 +78,6 @@ class PriceRequestService {
 
       developer.log('✅ ${detailsList.length} مورد دریافت شد');
 
-      // 🔍 DEBUG: بررسی ConfirmationStatus های واقعی
       final statusCounts = <int, int>{};
       for (var item in detailsList) {
         final status = item['ConfirmationStatus'];

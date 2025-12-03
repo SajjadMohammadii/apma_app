@@ -1,4 +1,3 @@
-// notifications_page.dart
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -75,7 +74,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                 ),
                 SizedBox(height: 40),
-                // بخش سفید بالا
                 Container(
                   padding: const EdgeInsets.symmetric(
                     vertical: 20,
@@ -99,7 +97,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                 ),
 
-                // بخش پایین
                 Container(
                   padding: const EdgeInsets.symmetric(
                     vertical: 10,

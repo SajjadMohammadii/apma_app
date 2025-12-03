@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/network/soap_client.dart';
 import 'package:apma_app/core/di/injection_container.dart';
+import 'package:apma_app/core/services/print_service.dart';
 import 'package:apma_app/screens/transaction/price_management/bloc/price_management_bloc.dart';
 import 'package:apma_app/screens/transaction/price_management/bloc/price_management_event.dart';
 import 'package:apma_app/screens/transaction/price_management/bloc/price_management_state.dart';
@@ -15,10 +17,13 @@ import 'package:apma_app/screens/transaction/price_management/widgets/table_head
 import 'package:apma_app/screens/transaction/price_management/widgets/table_row_widget.dart';
 import 'package:apma_app/screens/transaction/price_management/widgets/sub_table_widget.dart';
 import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shamsi_date/shamsi_date.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class PriceManagementPage extends StatefulWidget {
   const PriceManagementPage({super.key});
@@ -182,7 +187,6 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
   }
 
   void _convertApiDataToUIFormat(Map<String, List<PriceRequestModel>> grouped) {
-    // همیشه همه داده‌ها را از نو بسازیم
     mainData.clear();
     subData.clear();
     originalSubData.clear();
@@ -460,6 +464,11 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
       backgroundColor: AppColors.primaryGreen,
       elevation: 0,
       iconTheme: const IconThemeData(color: Colors.white),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      actions: _isDesktopOrWeb ? [_buildExportMenuButton()] : null,
       title: Row(
         children: [
           DateFieldWidget(
@@ -486,6 +495,324 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
         ],
       ),
     );
+  }
+
+  /// بررسی آیا پلتفرم دسکتاپ یا وب است
+  bool get _isDesktopOrWeb {
+    if (kIsWeb) return true;
+    return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+  }
+
+  /// دکمه منوی خروجی (PDF, Excel, Print)
+  Widget _buildExportMenuButton() {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Colors.white),
+      tooltip: 'خروجی',
+      onSelected: (value) {
+        switch (value) {
+          case 'pdf':
+            _exportToPdf();
+            break;
+          case 'excel':
+            _exportToExcel();
+            break;
+          case 'print':
+            _printData();
+            break;
+        }
+      },
+      itemBuilder:
+          (context) => [
+            const PopupMenuItem(
+              value: 'pdf',
+              child: Row(
+                children: [
+                  Icon(Icons.picture_as_pdf, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('خروجی PDF'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'excel',
+              child: Row(
+                children: [
+                  Icon(Icons.table_chart, color: Colors.green),
+                  SizedBox(width: 8),
+                  Text('خروجی Excel'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'print',
+              child: Row(
+                children: [
+                  Icon(Icons.print, color: Colors.blue),
+                  SizedBox(width: 8),
+                  Text('پرینت'),
+                ],
+              ),
+            ),
+          ],
+    );
+  }
+
+  /// آماده‌سازی داده‌های خروجی (مشترک برای PDF و Excel)
+  List<List<String>> _prepareExportData() {
+    final List<List<String>> allRows = [];
+
+    for (var parent in filteredData) {
+      final parentId = parent['id'];
+      final children = subData[parentId] ?? [];
+
+      if (children.isEmpty) {
+        // اگر فرزند نداشت، فقط اطلاعات پدر را اضافه کن
+        allRows.add([
+          parent['date']?.toString() ?? '',
+          parent['number']?.toString() ?? '',
+          parent['customer']?.toString() ?? '',
+          parent['issuer']?.toString() ?? '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+        ]);
+      } else {
+        for (var child in children) {
+          allRows.add([
+            parent['date']?.toString() ?? '',
+            parent['number']?.toString() ?? '',
+            parent['customer']?.toString() ?? '',
+            parent['issuer']?.toString() ?? '',
+            child['request_date']?.toString() ?? '',
+            child['product_name']?.toString() ?? '',
+            child['request_type']?.toString() ?? '',
+            _formatNumber(child['current_price']),
+            _formatNumber(child['requested_price']),
+            child['approval_status']?.toString() ?? '',
+          ]);
+        }
+      }
+    }
+
+    return allRows;
+  }
+
+  /// خروجی PDF
+  Future<void> _exportToPdf() async {
+    final allRows = _prepareExportData();
+
+    if (allRows.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('داده‌ای برای خروجی وجود ندارد')),
+      );
+      return;
+    }
+
+    await PrintService.exportPdf(
+      context: context,
+      fileName: 'price_management_${DateTime.now().millisecondsSinceEpoch}',
+      pdfBuilder: (format) async {
+        final pdf = pw.Document();
+
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: PdfPageFormat.a4.landscape,
+            textDirection: pw.TextDirection.rtl,
+            margin: const pw.EdgeInsets.all(20),
+            build:
+                (context) => [
+                  pw.Center(
+                    child: pw.Text(
+                      'گزارش مدیریت بهای تمام شده',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ),
+                  pw.SizedBox(height: 8),
+                  pw.Center(
+                    child: pw.Text(
+                      'از تاریخ: $fromDate  تا تاریخ: $toDate',
+                      style: const pw.TextStyle(fontSize: 10),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ),
+                  pw.SizedBox(height: 16),
+                  pw.Table.fromTextArray(
+                    cellAlignment: pw.Alignment.center,
+                    headerStyle: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 8,
+                    ),
+                    cellStyle: const pw.TextStyle(fontSize: 7),
+                    headerDecoration: const pw.BoxDecoration(
+                      color: PdfColors.grey300,
+                    ),
+                    headers: [
+                      'تاریخ سفارش',
+                      'شماره سفارش',
+                      'مشتری',
+                      'صادرکننده',
+                      'تاریخ درخواست',
+                      'نام کالا',
+                      'نوع درخواست',
+                      'قیمت فعلی',
+                      'قیمت درخواستی',
+                      'وضعیت',
+                    ],
+                    data: allRows,
+                    columnWidths: {
+                      0: const pw.FlexColumnWidth(1.2),
+                      1: const pw.FlexColumnWidth(1),
+                      2: const pw.FlexColumnWidth(1.5),
+                      3: const pw.FlexColumnWidth(1.3),
+                      4: const pw.FlexColumnWidth(1.2),
+                      5: const pw.FlexColumnWidth(2),
+                      6: const pw.FlexColumnWidth(1),
+                      7: const pw.FlexColumnWidth(1.2),
+                      8: const pw.FlexColumnWidth(1.2),
+                      9: const pw.FlexColumnWidth(1),
+                    },
+                  ),
+                ],
+          ),
+        );
+
+        return pdf.save();
+      },
+    );
+  }
+
+  /// خروجی Excel
+  Future<void> _exportToExcel() async {
+    final allRows = _prepareExportData();
+
+    if (allRows.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('داده‌ای برای خروجی وجود ندارد')),
+      );
+      return;
+    }
+
+    final columns = [
+      'تاریخ سفارش',
+      'شماره سفارش',
+      'مشتری',
+      'صادرکننده',
+      'تاریخ درخواست',
+      'نام کالا',
+      'نوع درخواست',
+      'قیمت فعلی',
+      'قیمت درخواستی',
+      'وضعیت',
+    ];
+
+    await PrintService.downloadExcel(
+      context: context,
+      columns: columns,
+      rows: allRows,
+      fileName: 'price_management_${DateTime.now().millisecondsSinceEpoch}',
+      sheetName: 'مدیریت بها',
+    );
+  }
+
+  /// فرمت کردن اعداد با جداکننده هزارگان
+  String _formatNumber(dynamic value) {
+    if (value == null) return '';
+    final num = int.tryParse(value.toString()) ?? 0;
+    return num.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
+  }
+
+  /// پرینت
+  Future<void> _printData() async {
+    final allRows = _prepareExportData();
+
+    if (allRows.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('داده‌ای برای پرینت وجود ندارد')),
+      );
+      return;
+    }
+
+    await PrintService.printPdf(context, (format) async {
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape,
+          textDirection: pw.TextDirection.rtl,
+          margin: const pw.EdgeInsets.all(20),
+          build:
+              (context) => [
+                pw.Center(
+                  child: pw.Text(
+                    'گزارش مدیریت بهای تمام شده',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textDirection: pw.TextDirection.rtl,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                pw.Center(
+                  child: pw.Text(
+                    'از تاریخ: $fromDate  تا تاریخ: $toDate',
+                    style: const pw.TextStyle(fontSize: 10),
+                    textDirection: pw.TextDirection.rtl,
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Table.fromTextArray(
+                  cellAlignment: pw.Alignment.center,
+                  headerStyle: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 8,
+                  ),
+                  cellStyle: const pw.TextStyle(fontSize: 7),
+                  headerDecoration: const pw.BoxDecoration(
+                    color: PdfColors.grey300,
+                  ),
+                  headers: [
+                    'تاریخ سفارش',
+                    'شماره سفارش',
+                    'مشتری',
+                    'صادرکننده',
+                    'تاریخ درخواست',
+                    'نام کالا',
+                    'نوع درخواست',
+                    'قیمت فعلی',
+                    'قیمت درخواستی',
+                    'وضعیت',
+                  ],
+                  data: allRows,
+                  columnWidths: {
+                    0: const pw.FlexColumnWidth(1.2),
+                    1: const pw.FlexColumnWidth(1),
+                    2: const pw.FlexColumnWidth(1.5),
+                    3: const pw.FlexColumnWidth(1.3),
+                    4: const pw.FlexColumnWidth(1.2),
+                    5: const pw.FlexColumnWidth(2),
+                    6: const pw.FlexColumnWidth(1),
+                    7: const pw.FlexColumnWidth(1.2),
+                    8: const pw.FlexColumnWidth(1.2),
+                    9: const pw.FlexColumnWidth(1),
+                  },
+                ),
+              ],
+        ),
+      );
+
+      return pdf.save();
+    }, fileName: 'price_management_print');
   }
 
   Widget _buildBody() {

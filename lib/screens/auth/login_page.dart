@@ -5,6 +5,7 @@ import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:apma_app/core/constants/app_constant.dart';
 import 'package:apma_app/core/constants/app_string.dart';
 import 'package:apma_app/core/di/injection_container.dart';
+import 'package:apma_app/core/mixins/permission_mixin.dart';
 import 'package:apma_app/core/services/local_storage_service.dart';
 import 'package:apma_app/core/widgets/apmaco_logo.dart';
 import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart';
@@ -32,7 +33,7 @@ class LoginView extends StatefulWidget {
   State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginViewState extends State<LoginView> with PermissionMixin {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -50,10 +51,10 @@ class _LoginViewState extends State<LoginView> {
     final savedPassword = localStorageService.savedPassword;
 
     if (savedUsername != null) {
-      _usernameController.text = savedUsername.trim(); // اضافه کردم trim
+      _usernameController.text = savedUsername.trim();
     }
     if (savedPassword != null) {
-      _passwordController.text = savedPassword.trim(); // اضافه کردم trim
+      _passwordController.text = savedPassword.trim();
     }
   }
 
@@ -65,7 +66,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _handleLogin() {
-    developer.log('👆 Login دکمه فشار خورد');
+    developer.log('👆 Login دکمه زده شد');
 
     if (_formKey.currentState!.validate()) {
       final username = _usernameController.text.trim();

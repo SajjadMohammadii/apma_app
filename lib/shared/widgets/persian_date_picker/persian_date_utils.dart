@@ -1,7 +1,6 @@
 import 'package:shamsi_date/shamsi_date.dart';
 
 class PersianDateUtils {
-  /// تبدیل تاریخ رشته‌ای به Jalali
   static Jalali? parseDate(String dateStr) {
     try {
       List<String> parts = dateStr.split('/');
@@ -15,12 +14,10 @@ class PersianDateUtils {
     }
   }
 
-  /// فرمت کردن تاریخ به رشته
   static String formatDate(Jalali date) {
     return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
-  /// بررسی اینکه آیا تاریخ در محدوده است یا نه
   static bool isDateInRange(String dateStr, String fromStr, String toStr) {
     try {
       List<String> dateParts = dateStr.split('/');

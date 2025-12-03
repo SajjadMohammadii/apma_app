@@ -5,9 +5,13 @@ import 'package:apma_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:apma_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:apma_app/screens/%20notifications/notification_page.dart';
 import 'package:apma_app/screens/auth/login_page.dart';
+import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart';
+import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart';
 
 import 'package:apma_app/screens/transaction/transaction.dart';
 import 'package:apma_app/screens/messages/messages_page.dart';
+import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart';
+import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +30,35 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   String _selectedCategory = 'مالی';
+  List<Map<String, dynamic>> favoriteItems = [];
+
+  // لیست تمام صفحات قابل دسترس
+  final List<Map<String, dynamic>> availablePages = [
+    {
+      'title': 'مدیریت بها',
+      'icon': Icons.analytics,
+      'route': '/price_management',
+      'widget': null, // Will be set dynamically
+    },
+    {
+      'title': 'چک',
+      'icon': Icons.receipt_long,
+      'route': '/bank_check',
+      'widget': null,
+    },
+    {
+      'title': 'ورود و خروج',
+      'icon': Icons.departure_board,
+      'route': 'EntryـExitـpage/',
+      'widget': null,
+    },
+    {
+      'title': 'تحویل مرسولات',
+      'icon': Icons.departure_board,
+      'route': '/delivery_parcels',
+      'widget': null,
+    },
+  ];
 
   final List<String> _categories = [
     'مالی',
@@ -226,7 +259,7 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           children: [
             _buildTabItem(title: 'اطلاعیه ها', index: 0),
-            _buildTabItem(title: 'زمان های کاری', index: 1),
+            _buildTabItem(title: 'پرکاربرد ها', index: 1),
             _buildTabItem(title: 'فعالیت ها', index: 2),
           ],
         ),
@@ -362,33 +395,168 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'زمان‌های کاری',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                fontFamily: 'Vazir',
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'پرکاربردها',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    fontFamily: 'Vazir',
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.add_circle_outline,
+                    color: AppColors.primaryGreen,
+                  ),
+                  onPressed: () => _showAddFavoriteDialog(),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildWorkHourItem(day: 'شنبه تا چهارشنبه', hours: '۸:۰۰ - ۱۷:۰۰'),
-            _buildWorkHourItem(day: 'پنجشنبه', hours: '۸:۰۰ - 13:۰۰'),
-            _buildWorkHourItem(day: 'جمعه', hours: 'تعطیل'),
-            const SizedBox(height: 16),
-            const Text(
-              'زمان کاری امروز: ۸:۰۰ - ۱۷:۰۰',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.primaryGreen,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Vazir',
-              ),
-            ),
+            const SizedBox(height: 12),
+            if (favoriteItems.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(
+                    'هیچ موردی اضافه نشده است\nبرای افزودن روی + کلیک کنید',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Vazir',
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ...favoriteItems.map((item) => _buildFavoriteItem(item)).toList(),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildFavoriteItem(Map<String, dynamic> item) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(item['icon'], color: AppColors.primaryPurple),
+        title: Text(item['title'], style: const TextStyle(fontFamily: 'Vazir')),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          onPressed: () {
+            setState(() {
+              favoriteItems.remove(item);
+            });
+          },
+        ),
+        onTap: () => _navigateToPage(item),
+      ),
+    );
+  }
+
+  void _showAddFavoriteDialog() {
+    // فیلتر کردن صفحاتی که قبلاً اضافه نشدن
+    final notAddedPages =
+        availablePages.where((page) {
+          return !favoriteItems.any((fav) => fav['route'] == page['route']);
+        }).toList();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              title: const Text(
+                'افزودن به پرکاربردها',
+                style: TextStyle(fontFamily: 'Vazir'),
+              ),
+              content:
+                  notAddedPages.isEmpty
+                      ? const Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Text(
+                          'همه صفحات اضافه شده‌اند',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Vazir'),
+                        ),
+                      )
+                      : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children:
+                            notAddedPages.map((page) {
+                              return ListTile(
+                                leading: Icon(
+                                  page['icon'],
+                                  color: AppColors.primaryPurple,
+                                ),
+                                title: Text(
+                                  page['title'],
+                                  style: const TextStyle(fontFamily: 'Vazir'),
+                                ),
+                                onTap: () {
+                                  _addToFavorites(page);
+                                  Navigator.pop(context);
+                                },
+                              );
+                            }).toList(),
+                      ),
+            ),
+          ),
+    );
+  }
+
+  void _addToFavorites(Map<String, dynamic> page) {
+    setState(() {
+      favoriteItems.add({
+        'title': page['title'],
+        'icon': page['icon'],
+        'route': page['route'],
+      });
+    });
+  }
+
+  void _navigateToPage(Map<String, dynamic> item) {
+    switch (item['route']) {
+      case '/price_management':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PriceManagementPage()),
+        );
+        break;
+      case '/bank_check':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const BankCheckPage()),
+        );
+        break;
+      case 'EntryـExitـpage/':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const EntryExitPage()),
+        );
+        break;
+      case '/delivery_parcels':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DeliveryParcelsPage()),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'صفحه در دسترس نیست',
+              style: TextStyle(fontFamily: 'Vazir'),
+            ),
+          ),
+        );
+    }
   }
 
   Widget _buildActivitiesContent() {
@@ -526,37 +694,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildWorkHourItem({required String day, required String hours}) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              day,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textPrimary,
-                fontFamily: 'Vazir',
-              ),
-            ),
-            Text(
-              hours,
-              style: TextStyle(
-                fontSize: 14,
-                color: hours == 'تعطیل' ? Colors.red : AppColors.primaryGreen,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Vazir',
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActivityItem({
     required String title,
     required int count,
@@ -676,7 +813,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.pop(context);
                   if (_selectedCategory == 'مالی' ||
-                      _selectedCategory == 'تسهیل دار') {
+                      _selectedCategory == 'تسهیل دار' ||
+                      _selectedCategory == 'پرسنلی') {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
