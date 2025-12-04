@@ -1,66 +1,67 @@
-// Dependency injection setup using GetIt service locator.
-// Relates to: main.dart, auth_bloc.dart, all repositories and use cases
+// تنظیم تزریق وابستگی با استفاده از GetIt service locator
+// مرتبط با: main.dart, auth_bloc.dart, تمام repositoryها و use caseها
 
-import 'package:apma_app/core/network/soap_client.dart';
-import 'package:apma_app/core/services/local_storage_service.dart';
-import 'package:apma_app/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:apma_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:apma_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:apma_app/features/auth/domain/usecases/login_usecase.dart';
-import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import 'package:apma_app/core/network/soap_client.dart'; // کلاینت SOAP
+import 'package:apma_app/core/services/local_storage_service.dart'; // سرویس ذخیره‌سازی محلی
+import 'package:apma_app/features/auth/data/datasources/auth_remote_datasource.dart'; // منبع داده راه دور
+import 'package:apma_app/features/auth/data/repositories/auth_repository_impl.dart'; // پیاده‌سازی ریپازیتوری
+import 'package:apma_app/features/auth/domain/repositories/auth_repository.dart'; // رابط ریپازیتوری
+import 'package:apma_app/features/auth/domain/usecases/login_usecase.dart'; // یوزکیس ورود
+import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart'; // بلاک احراز هویت
+import 'package:get_it/get_it.dart'; // کتابخانه GetIt برای تزریق وابستگی
+import 'package:shared_preferences/shared_preferences.dart'; // ذخیره‌سازی تنظیمات
+import 'package:http/http.dart' as http; // کلاینت HTTP
 
-// Export sl so it can be used in other files
+// متغیر sl - نمونه GetIt برای استفاده در سایر فایل‌ها (Service Locator)
 final sl = GetIt.instance;
 
+// تابع init - مقداردهی اولیه تمام وابستگی‌ها
 Future<void> init() async {
-  //! Features - Auth
+  //! ویژگی‌ها - احراز هویت
 
-  // Bloc
+  // بلاک - ثبت به صورت Factory (هر بار نمونه جدید)
   sl.registerFactory(
     () => AuthBloc(
-      loginUseCase: sl(),
-      repository: sl(),
-      localStorageService: sl(),
+      loginUseCase: sl(), // یوزکیس ورود
+      repository: sl(), // ریپازیتوری
+      localStorageService: sl(), // سرویس ذخیره‌سازی محلی
     ),
   );
 
-  // Use cases
+  // یوزکیس‌ها - ثبت به صورت LazySingleton
   sl.registerLazySingleton(() => LoginUseCase(sl()));
 
-  // Repository
+  // ریپازیتوری - ثبت به صورت LazySingleton
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // Data sources -use soap
+  // منابع داده - استفاده از SOAP
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(soapClient: sl()),
   );
 
-  //! Core
+  //! هسته
 
-  // LocalStorageService
+  // سرویس ذخیره‌سازی محلی - مقداردهی و ثبت
   final localStorageService = LocalStorageService();
-  await localStorageService.init();
+  await localStorageService.init(); // مقداردهی اولیه
   sl.registerLazySingleton(() => localStorageService);
 
-  // SOAP Client
+  // کلاینت SOAP - ثبت با آدرس وب‌سرویس
   sl.registerLazySingleton<SoapClient>(
     () => SoapClient(
-      baseUrl: AuthRemoteDataSourceImpl.webServiceUrl,
-      httpClient: sl(),
+      baseUrl: AuthRemoteDataSourceImpl.webServiceUrl, // آدرس وب‌سرویس
+      httpClient: sl(), // کلاینت HTTP
     ),
   );
 
-  //! External
+  //! خارجی
 
-  // HTTP Client
+  // کلاینت HTTP - ثبت به صورت LazySingleton
   sl.registerLazySingleton(() => http.Client());
 
-  // SharedPreferences
+  // SharedPreferences - دریافت نمونه و ثبت
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 }

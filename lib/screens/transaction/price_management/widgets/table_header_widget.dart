@@ -1,11 +1,16 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
+// ویجت هدر جدول - نمایش عناوین ستون‌ها با قابلیت مرتب‌سازی
+// مرتبط با: price_management_page.dart, table_row_widget.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس TableHeaderWidget - ویجت هدر جدول اصلی
 class TableHeaderWidget extends StatelessWidget {
-  final int? sortColumnIndex;
-  final bool isAscending;
-  final Function(int) onSort;
+  final int? sortColumnIndex; // ستون مرتب‌سازی فعلی
+  final bool isAscending; // صعودی یا نزولی
+  final Function(int) onSort; // callback مرتب‌سازی
 
+  // سازنده
   const TableHeaderWidget({
     super.key,
     required this.sortColumnIndex,
@@ -14,10 +19,11 @@ class TableHeaderWidget extends StatelessWidget {
   });
 
   @override
+  // متد build - ساخت رابط کاربری هدر
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primaryGreen,
+        color: AppColors.primaryGreen, // رنگ پس‌زمینه سبز
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8),
           topRight: Radius.circular(8),
@@ -36,6 +42,7 @@ class TableHeaderWidget extends StatelessWidget {
           IntrinsicHeight(
             child: Row(
               children: [
+                // ستون‌های هدر
                 _buildSortableHeader(
                   'ردیف',
                   flex: 1,
@@ -52,6 +59,7 @@ class TableHeaderWidget extends StatelessWidget {
               ],
             ),
           ),
+          // خط جداکننده پایین
           Container(
             height: 1,
             color: Colors.white.withOpacity(0.3),
@@ -62,18 +70,19 @@ class TableHeaderWidget extends StatelessWidget {
     );
   }
 
+  // متد _buildSortableHeader - ساخت هدر با قابلیت مرتب‌سازی
   Widget _buildSortableHeader(
-    String text, {
-    required int flex,
-    required int index,
+    String text, { // متن هدر
+    required int flex, // نسبت عرض
+    required int index, // ایندکس ستون (-1 = غیرقابل مرتب‌سازی)
   }) {
-    final isActive = sortColumnIndex == index;
+    final isActive = sortColumnIndex == index; // آیا این ستون فعال است
     final isSortable = index >= 0; // ردیف سورت نمیخوره
 
     return Expanded(
       flex: flex,
       child: InkWell(
-        onTap: isSortable ? () => onSort(index) : null,
+        onTap: isSortable ? () => onSort(index) : null, // کلیک برای مرتب‌سازی
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -90,6 +99,7 @@ class TableHeaderWidget extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            // آیکون مرتب‌سازی
             if (isSortable) ...[
               const SizedBox(width: 4),
               Icon(
@@ -106,6 +116,7 @@ class TableHeaderWidget extends StatelessWidget {
     );
   }
 
+  // متد _buildDivider - ساخت خط جداکننده عمودی
   Widget _buildDivider() {
     return Container(width: 1, color: Colors.white.withOpacity(0.3));
   }

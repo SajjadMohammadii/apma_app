@@ -1,13 +1,18 @@
-import 'dart:io';
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// صفحه امضا - دریافت امضای دیجیتال تحویل‌گیرنده
+// مرتبط با: delivery_nearby_page.dart, delivery_parcels.dart
 
+import 'dart:io'; // کتابخانه کار با فایل
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+
+// کلاس SignaturePage - صفحه امضای دیجیتال
 class SignaturePage extends StatefulWidget {
-  final String customerName;
-  final String location;
+  final String customerName; // نام مشتری
+  final String location; // مکان تحویل
 
+  // سازنده
   const SignaturePage({
     super.key,
     required this.customerName,
@@ -18,15 +23,18 @@ class SignaturePage extends StatefulWidget {
   State<SignaturePage> createState() => _SignaturePageState();
 }
 
+// کلاس _SignaturePageState - state صفحه امضا
 class _SignaturePageState extends State<SignaturePage> {
-  final List<Offset?> _signaturePoints = [];
+  final List<Offset?> _signaturePoints = []; // نقاط امضا (null = قطع خط)
 
+  // بررسی پلتفرم موبایل
   bool get _isMobile {
     if (kIsWeb) return false;
     return Platform.isAndroid || Platform.isIOS;
   }
 
   @override
+  // متد initState - تنظیم جهت صفحه به افقی
   void initState() {
     super.initState();
     if (_isMobile) {
@@ -38,9 +46,10 @@ class _SignaturePageState extends State<SignaturePage> {
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه امضا
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
@@ -49,9 +58,10 @@ class _SignaturePageState extends State<SignaturePage> {
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context), // برگشت
           ),
           actions: [
+            // دکمه تایید و ذخیره
             TextButton.icon(
               onPressed: _saveSignature,
               icon: const Icon(Icons.check, size: 18, color: Colors.white),
@@ -94,6 +104,7 @@ class _SignaturePageState extends State<SignaturePage> {
                     ),
                     child: Column(
                       children: [
+                        // هدر با آیکون و دکمه پاک کردن
                         Row(
                           children: [
                             Icon(
@@ -103,7 +114,7 @@ class _SignaturePageState extends State<SignaturePage> {
                             ),
                             const SizedBox(width: 8),
                             const Text(
-                              'لطفاً در کادر زیر امضا کنید',
+                              'لطفاً در کادر زیر امضا کنید', // راهنما
                               style: TextStyle(
                                 fontFamily: 'Vazir',
                                 fontSize: 12,
@@ -111,6 +122,7 @@ class _SignaturePageState extends State<SignaturePage> {
                               ),
                             ),
                             const Spacer(),
+                            // دکمه پاک کردن امضا
                             TextButton.icon(
                               onPressed:
                                   () =>
@@ -127,7 +139,7 @@ class _SignaturePageState extends State<SignaturePage> {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        // کادر امضا
+                        // کادر امضا - بوم نقاشی
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -146,22 +158,26 @@ class _SignaturePageState extends State<SignaturePage> {
                                   builder: (context, constraints) {
                                     return GestureDetector(
                                       behavior: HitTestBehavior.opaque,
+                                      // شروع کشیدن - افزودن نقطه
                                       onPanStart:
                                           (d) => setState(
                                             () => _signaturePoints.add(
                                               d.localPosition,
                                             ),
                                           ),
+                                      // ادامه کشیدن - افزودن نقاط
                                       onPanUpdate:
                                           (d) => setState(
                                             () => _signaturePoints.add(
                                               d.localPosition,
                                             ),
                                           ),
+                                      // پایان کشیدن - قطع خط با null
                                       onPanEnd:
                                           (d) => setState(
                                             () => _signaturePoints.add(null),
                                           ),
+                                      // رسم امضا با CustomPaint
                                       child: CustomPaint(
                                         size: Size(
                                           constraints.maxWidth,
@@ -190,12 +206,14 @@ class _SignaturePageState extends State<SignaturePage> {
     );
   }
 
+  // متد _saveSignature - ذخیره امضا و برگشت
   void _saveSignature() {
+    // بررسی خالی بودن امضا
     if (_signaturePoints.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            'لطفاً امضا کنید',
+            'لطفاً امضا کنید', // پیام خطا
             style: TextStyle(fontFamily: 'Vazir'),
           ),
           backgroundColor: Colors.red,
@@ -208,22 +226,29 @@ class _SignaturePageState extends State<SignaturePage> {
       return;
     }
 
-    Navigator.pop(context, true);
+    Navigator.pop(context, true); // برگشت با نتیجه موفق
   }
 }
 
+// کلاس SignaturePainter - رسم‌کننده امضا روی بوم
 class SignaturePainter extends CustomPainter {
-  final List<Offset?> points;
+  final List<Offset?> points; // لیست نقاط امضا
   SignaturePainter(this.points);
 
   @override
+  // متد paint - رسم خطوط امضا
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.black
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 2.5;
+          ..color =
+              Colors
+                  .black // رنگ مشکی
+          ..strokeCap =
+              StrokeCap
+                  .round // سر گرد
+          ..strokeWidth = 2.5; // ضخامت خط
 
+    // رسم خطوط بین نقاط متوالی
     for (int i = 0; i < points.length - 1; i++) {
       if (points[i] != null && points[i + 1] != null) {
         canvas.drawLine(points[i]!, points[i + 1]!, paint);
@@ -232,5 +257,6 @@ class SignaturePainter extends CustomPainter {
   }
 
   @override
+  // همیشه دوباره رسم کن
   bool shouldRepaint(SignaturePainter oldDelegate) => true;
 }

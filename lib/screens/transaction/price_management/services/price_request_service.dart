@@ -1,19 +1,25 @@
-import 'dart:convert';
-import 'dart:developer' as developer;
-import 'package:apma_app/core/network/soap_client.dart';
-import 'package:apma_app/screens/transaction/price_management/models/price_request_model.dart';
+// سرویس درخواست‌های تغییر قیمت - ارتباط با API
+// مرتبط با: price_management_bloc.dart, soap_client.dart
 
+import 'dart:convert'; // کتابخانه JSON
+import 'dart:developer' as developer; // ابزار لاگ‌گیری
+import 'package:apma_app/core/network/soap_client.dart'; // کلاینت SOAP
+import 'package:apma_app/screens/transaction/price_management/models/price_request_model.dart'; // مدل
+
+// کلاس PriceRequestService - سرویس API درخواست‌های قیمت
 class PriceRequestService {
-  final SoapClient soapClient;
-  static const String namespace = 'http://apmaco.com/';
+  final SoapClient soapClient; // کلاینت SOAP
+  static const String namespace = 'http://apmaco.com/'; // فضای نام وب‌سرویس
 
+  // سازنده
   PriceRequestService({required this.soapClient});
 
+  // متد loadPriceChangeRequestsList - دریافت لیست درخواست‌های تغییر قیمت
   Future<List<PriceRequestModel>> loadPriceChangeRequestsList({
-    String? fromDate,
-    String? toDate,
-    int status = 0,
-    String criteria = '',
+    String? fromDate, // تاریخ شروع
+    String? toDate, // تاریخ پایان
+    int status = 0, // وضعیت (۰=همه)
+    String criteria = '', // کلمات کلیدی
   }) async {
     try {
       // اگر تاریخ خالی یا null است، NULL ارسال کنید
@@ -24,10 +30,11 @@ class PriceRequestService {
         'Criteria': criteria,
       };
 
-      final String dataParam = jsonEncode(filterData);
+      final String dataParam = jsonEncode(filterData); // تبدیل به JSON
 
       developer.log('🔍 LoadPriceChangeRequestsList');
 
+      // فراخوانی متد SOAP
       final response = await soapClient.call(
         method: 'LoadPriceChangeRequestsList',
         parameters: {'data': dataParam, 'isNested': '0'},
@@ -35,6 +42,7 @@ class PriceRequestService {
         soapAction: '${namespace}LoadPriceChangeRequestsList',
       );
 
+      // استخراج نتیجه از پاسخ
       final resultString = soapClient.extractValue(
         response,
         'LoadPriceChangeRequestsListResult',
@@ -47,9 +55,11 @@ class PriceRequestService {
       developer.log('📦 پاسخ سرور: ${resultString.length} کاراکتر');
       developer.log('📄 محتوای پاسخ: $resultString');
 
+      // پارس JSON
       final Map<String, dynamic> resultJson = jsonDecode(resultString);
       final int error = resultJson['Error'] ?? 1;
 
+      // بررسی خطا
       if (error != 0) {
         final String errorMessage =
             resultJson['Message'] ?? 'خطای نامشخص از سرور';
@@ -57,6 +67,7 @@ class PriceRequestService {
         throw Exception(errorMessage);
       }
 
+      // استخراج جزئیات
       final detailsData = resultJson['Details'];
       if (detailsData == null) {
         developer.log('⚠️ لیست خالی');
@@ -78,6 +89,7 @@ class PriceRequestService {
 
       developer.log('✅ ${detailsList.length} مورد دریافت شد');
 
+      // شمارش وضعیت‌ها برای دیباگ
       final statusCounts = <int, int>{};
       for (var item in detailsList) {
         final status = item['ConfirmationStatus'];
@@ -98,6 +110,7 @@ class PriceRequestService {
         developer.log('   Status $status: $count مورد');
       });
 
+      // تبدیل به لیست مدل
       return detailsList
           .map(
             (json) => PriceRequestModel.fromJson(json as Map<String, dynamic>),
@@ -109,9 +122,10 @@ class PriceRequestService {
     }
   }
 
+  // متد setPriceChangeRequestConfirmationStatus - تنظیم وضعیت تایید درخواست
   Future<void> setPriceChangeRequestConfirmationStatus(
-    String id,
-    int confirmationStatus,
+    String id, // شناسه درخواست
+    int confirmationStatus, // وضعیت جدید
   ) async {
     try {
       final Map<String, dynamic> data = {
@@ -123,6 +137,7 @@ class PriceRequestService {
 
       developer.log('💾 ذخیره وضعیت: ID=$id, Status=$confirmationStatus');
 
+      // فراخوانی متد SOAP
       await soapClient.call(
         method: 'SetPriceChangeRequestConfirmationStatus',
         parameters: {'data': dataParam},
@@ -137,6 +152,7 @@ class PriceRequestService {
     }
   }
 
+  // متد saveAllChanges - ذخیره تمام تغییرات
   Future<void> saveAllChanges(List<PriceRequestModel> changedRequests) async {
     for (var request in changedRequests) {
       await setPriceChangeRequestConfirmationStatus(
@@ -146,12 +162,13 @@ class PriceRequestService {
     }
   }
 
+  // متد groupByOrderNumber - گروه‌بندی بر اساس شماره سفارش
   Map<String, List<PriceRequestModel>> groupByOrderNumber(
     List<PriceRequestModel> requests,
   ) {
     final Map<String, List<PriceRequestModel>> grouped = {};
     for (var request in requests) {
-      final key = request.number;
+      final key = request.number; // شماره سفارش به عنوان کلید
       if (!grouped.containsKey(key)) {
         grouped[key] = [];
       }

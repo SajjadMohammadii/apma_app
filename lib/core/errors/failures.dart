@@ -1,42 +1,43 @@
-// Failure classes for error handling across the app.
-// Relates to: exceptions.dart, auth_repository.dart, auth_bloc.dart
+// کلاس‌های خطا برای مدیریت خطا در سراسر برنامه
+// مرتبط با: exceptions.dart, auth_repository.dart, auth_bloc.dart
 
-import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart'; // کتابخانه مقایسه اشیاء
 
+// کلاس انتزاعی Failure - کلاس پایه برای تمام خطاها
 abstract class Failure extends Equatable {
-  final String message;
-  const Failure(this.message);
+  final String message; // پیام خطا
+  const Failure(this.message); // سازنده
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message]; // پراپرتی‌ها برای مقایسه
 }
 
-// Server failures
+// کلاس ServerFailure - خطاهای سرور
 class ServerFailure extends Failure {
   const ServerFailure(super.message);
 }
 
-// Network failures
+// کلاس NetworkFailure - خطاهای شبکه
 class NetworkFailure extends Failure {
   const NetworkFailure(super.message);
 }
 
-// Cache failures
+// کلاس CacheFailure - خطاهای کش
 class CacheFailure extends Failure {
   const CacheFailure(super.message);
 }
 
-// Authentication failures
+// کلاس AuthenticationFailure - خطاهای احراز هویت
 class AuthenticationFailure extends Failure {
   const AuthenticationFailure(super.message);
 }
 
-// Validation failures
+// کلاس ValidationFailure - خطاهای اعتبارسنجی
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
 
-// Generic failure
+// کلاس GeneralFailure - خطاهای عمومی
 class GeneralFailure extends Failure {
   const GeneralFailure(super.message);
 }

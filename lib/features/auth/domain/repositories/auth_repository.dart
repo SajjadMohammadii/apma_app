@@ -1,31 +1,41 @@
-// Authentication repository contract defining domain-level authentication operations.
-// Relates to: auth_repository_impl.dart, login_usecase.dart, user.dart
+// قرارداد ریپازیتوری احراز هویت - تعریف عملیات احراز هویت در لایه دامین
+// مرتبط با: auth_repository_impl.dart, login_usecase.dart, user.dart
 
-import 'package:apma_app/core/errors/failures.dart';
-import 'package:apma_app/features/auth/domain/entities/user.dart';
-import 'package:dartz/dartz.dart';
+import 'package:apma_app/core/errors/failures.dart'; // کلاس‌های خطا
+import 'package:apma_app/features/auth/domain/entities/user.dart'; // موجودیت کاربر
+import 'package:dartz/dartz.dart'; // کتابخانه برنامه‌نویسی تابعی (Either)
 
-/// Repository interface for authentication operations.
+/// کلاس انتزاعی AuthRepository - رابط ریپازیتوری برای عملیات احراز هویت
 abstract class AuthRepository {
-  /// Authenticates user with username and password.
+  /// متد login - احراز هویت کاربر با نام کاربری و رمز عبور
+  /// پارامتر username: نام کاربری
+  /// پارامتر password: رمز عبور
+  /// برمی‌گرداند: Either شامل Failure (در صورت خطا) یا User (در صورت موفقیت)
   Future<Either<Failure, User>> login({
     required String username,
     required String password,
   });
 
-  /// Registers a new user account.
+  /// متد register - ثبت‌نام حساب کاربری جدید
+  /// پارامتر username: نام کاربری
+  /// پارامتر password: رمز عبور
+  /// پارامتر email: آدرس ایمیل
+  /// برمی‌گرداند: Either شامل Failure یا User
   Future<Either<Failure, User>> register({
     required String username,
     required String password,
     required String email,
   });
 
-  /// Logs out the current user.
+  /// متد logout - خروج کاربر فعلی از سیستم
+  /// برمی‌گرداند: Either شامل Failure یا void
   Future<Either<Failure, void>> logout();
 
-  /// Retrieves the currently authenticated user.
+  /// متد getCurrentUser - دریافت کاربر فعلی احراز هویت شده
+  /// برمی‌گرداند: Either شامل Failure یا User
   Future<Either<Failure, User>> getCurrentUser();
 
-  /// Checks if a user is currently logged in.
+  /// متد isLoggedIn - بررسی اینکه آیا کاربری وارد شده است
+  /// برمی‌گرداند: Either شامل Failure یا bool
   Future<Either<Failure, bool>> isLoggedIn();
 }

@@ -1,25 +1,30 @@
-import 'dart:developer' as developer;
+// مدل درخواست تغییر قیمت
+// مرتبط با: price_management_bloc.dart, price_request_service.dart
 
+import 'dart:developer' as developer; // ابزار لاگ‌گیری
+
+// کلاس PriceRequestModel - مدل داده‌ای درخواست تغییر قیمت
 class PriceRequestModel {
-  final String orderID;
-  final String orderDate;
-  final String personID;
-  final String personName;
-  final String personSurname;
-  final String number;
-  final String date;
-  final String sherkat;
-  final String typeSherkat;
-  final String orderDetailID;
-  final String codekalaID;
-  final String id;
-  final int priceTag;
-  int confirmationStatus;
-  final String title;
-  final String kindID;
-  final double currentPrice;
-  final double requestedPrice;
+  final String orderID; // شناسه سفارش
+  final String orderDate; // تاریخ سفارش
+  final String personID; // شناسه شخص
+  final String personName; // نام شخص
+  final String personSurname; // نام خانوادگی شخص
+  final String number; // شماره درخواست
+  final String date; // تاریخ درخواست
+  final String sherkat; // نام شرکت/مشتری
+  final String typeSherkat; // نوع شرکت
+  final String orderDetailID; // شناسه جزئیات سفارش
+  final String codekalaID; // شناسه کد کالا
+  final String id; // شناسه یکتا
+  final int priceTag; // برچسب قیمت (۰=حداقل، ۱=حداکثر)
+  int confirmationStatus; // وضعیت تایید (۱=بررسی، ۲=تایید، ۳=رد)
+  final String title; // عنوان کالا
+  final String kindID; // شناسه نوع
+  final double currentPrice; // قیمت فعلی
+  final double requestedPrice; // قیمت درخواستی
 
+  // سازنده
   PriceRequestModel({
     required this.orderID,
     required this.orderDate,
@@ -41,6 +46,7 @@ class PriceRequestModel {
     required this.requestedPrice,
   });
 
+  // متد fromJson - ساخت مدل از JSON
   factory PriceRequestModel.fromJson(Map<String, dynamic> json) {
     return PriceRequestModel(
       orderID: json['OrderID']?.toString() ?? '',
@@ -77,10 +83,12 @@ class PriceRequestModel {
     );
   }
 
+  // متد toJson - تبدیل مدل به JSON
   Map<String, dynamic> toJson() {
     return {'ID': id, 'ConfirmationStatus': confirmationStatus};
   }
 
+  // getter persianOrderDate - تاریخ سفارش به فرمت شمسی
   String get persianOrderDate {
     if (orderDate.length == 8) {
       final year = orderDate.substring(0, 4);
@@ -91,6 +99,7 @@ class PriceRequestModel {
     return orderDate;
   }
 
+  // getter persianDate - تاریخ درخواست به فرمت شمسی
   String get persianDate {
     if (date.length >= 8) {
       final year = date.substring(0, 4);
@@ -101,12 +110,15 @@ class PriceRequestModel {
     return date;
   }
 
+  // getter requestType - نوع درخواست (حداقل/حداکثر)
   String get requestType {
     return priceTag == 0 ? 'حداقل قیمت' : 'حداکثر قیمت';
   }
 
+  // getter fullPersonName - نام کامل شخص
   String get fullPersonName => '$personName $personSurname'.trim();
 
+  // getter statusString - وضعیت به صورت رشته فارسی
   String get statusString {
     switch (confirmationStatus) {
       case 1:
@@ -122,6 +134,7 @@ class PriceRequestModel {
     }
   }
 
+  // getter formattedCurrentPrice - قیمت فعلی با جداکننده هزارگان
   String get formattedCurrentPrice {
     return currentPrice
         .toStringAsFixed(0)
@@ -131,6 +144,7 @@ class PriceRequestModel {
         );
   }
 
+  // getter formattedRequestedPrice - قیمت درخواستی با جداکننده هزارگان
   String get formattedRequestedPrice {
     return requestedPrice
         .toStringAsFixed(0)

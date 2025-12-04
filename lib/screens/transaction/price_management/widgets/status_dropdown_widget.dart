@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
+// ویجت دراپ‌داون وضعیت - انتخاب وضعیت فیلتر
+// مرتبط با: price_management_page.dart
 
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس StatusDropdownWidget - ویجت دراپ‌داون وضعیت
 class StatusDropdownWidget extends StatelessWidget {
-  final String selectedStatus;
-  final List<String> statusOptions;
-  final Function(String?) onChanged;
+  final String selectedStatus; // وضعیت انتخاب شده
+  final List<String> statusOptions; // گزینه‌های وضعیت
+  final Function(String?) onChanged; // callback تغییر
 
+  // سازنده
   const StatusDropdownWidget({
     super.key,
     required this.selectedStatus,
@@ -13,6 +18,7 @@ class StatusDropdownWidget extends StatelessWidget {
   });
 
   @override
+  // متد build - ساخت رابط کاربری دراپ‌داون
   Widget build(BuildContext context) {
     return Container(
       height: 32,
@@ -23,7 +29,7 @@ class StatusDropdownWidget extends StatelessWidget {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: selectedStatus,
+          value: selectedStatus, // مقدار انتخاب شده
           dropdownColor: Colors.white,
           isDense: true,
           alignment: Alignment.centerRight,
@@ -32,6 +38,7 @@ class StatusDropdownWidget extends StatelessWidget {
             fontSize: 10,
             color: Colors.black87,
           ),
+          // ساخت آیتم انتخاب شده
           selectedItemBuilder: (BuildContext context) {
             return statusOptions.map((String value) {
               return Align(
@@ -48,6 +55,7 @@ class StatusDropdownWidget extends StatelessWidget {
               );
             }).toList();
           },
+          // آیتم‌های لیست
           items:
               statusOptions.map((String value) {
                 return DropdownMenuItem<String>(
@@ -60,7 +68,7 @@ class StatusDropdownWidget extends StatelessWidget {
                   ),
                 );
               }).toList(),
-          onChanged: onChanged,
+          onChanged: onChanged, // اعمال تغییر
         ),
       ),
     );

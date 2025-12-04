@@ -1,78 +1,88 @@
-// BLoC managing authentication state and business logic.
-// Relates to: auth_event.dart, auth_state.dart, login_usecase.dart, auth_repository.dart, local_storage_service.dart
+// بلاک مدیریت state و منطق تجاری احراز هویت
+// مرتبط با: auth_event.dart, auth_state.dart, login_usecase.dart, auth_repository.dart, local_storage_service.dart
 
-import 'package:apma_app/core/errors/failures.dart';
-import 'package:apma_app/core/services/local_storage_service.dart';
-import 'package:apma_app/features/auth/data/models/user_model.dart';
-import 'package:apma_app/features/auth/domain/entities/user.dart';
-import 'package:apma_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:apma_app/features/auth/domain/usecases/login_usecase.dart';
-import 'package:dartz/dartz.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
+import 'package:apma_app/core/errors/failures.dart'; // کلاس‌های خطا
+import 'package:apma_app/core/services/local_storage_service.dart'; // سرویس ذخیره‌سازی محلی
+import 'package:apma_app/features/auth/data/models/user_model.dart'; // مدل کاربر
+import 'package:apma_app/features/auth/domain/entities/user.dart'; // موجودیت کاربر
+import 'package:apma_app/features/auth/domain/repositories/auth_repository.dart'; // ریپازیتوری احراز هویت
+import 'package:apma_app/features/auth/domain/usecases/login_usecase.dart'; // یوزکیس ورود
+import 'package:dartz/dartz.dart'; // کتابخانه Either
+import 'package:flutter_bloc/flutter_bloc.dart'; // فریمورک BLoC
+import 'auth_event.dart'; // رویدادهای احراز هویت
+import 'auth_state.dart'; // وضعیت‌های احراز هویت
 
-// Handles authentication events and emits corresponding states.
+// کلاس AuthBloc - مدیریت رویدادهای احراز هویت و انتشار وضعیت‌های متناظر
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final LoginUseCase? loginUseCase;
-  final AuthRepository? repository;
-  final LocalStorageService localStorageService;
+  final LoginUseCase? loginUseCase; // یوزکیس ورود (اختیاری)
+  final AuthRepository? repository; // ریپازیتوری احراز هویت (اختیاری)
+  final LocalStorageService localStorageService; // سرویس ذخیره‌سازی محلی
 
+  // سازنده بلاک - تنظیم هندلرهای رویداد
   AuthBloc({
     this.loginUseCase,
     this.repository,
     required this.localStorageService,
   }) : super(const AuthInitial()) {
-    on<LoginEvent>(_onLogin);
-    on<LogoutEvent>(_onLogout);
-    on<CheckAuthStatusEvent>(_onCheckAuthStatus);
-    on<AutoLoginEvent>(_onAutoLogin);
+    on<LoginEvent>(_onLogin); // هندلر رویداد ورود
+    on<LogoutEvent>(_onLogout); // هندلر رویداد خروج
+    on<CheckAuthStatusEvent>(
+      _onCheckAuthStatus,
+    ); // هندلر بررسی وضعیت احراز هویت
+    on<AutoLoginEvent>(_onAutoLogin); // هندلر ورود خودکار
   }
 
-  // Handles manual login with save password dialog.
+  // متد _onLogin - مدیریت ورود دستی با دیالوگ ذخیره رمز عبور
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
+    emit(const AuthLoading()); // انتشار وضعیت در حال بارگذاری
 
     try {
-      Either<Failure, User> result;
+      Either<Failure, User> result; // نتیجه عملیات
       if (loginUseCase != null) {
+        // اگر یوزکیس موجود است
         result = await loginUseCase!(
           LoginParams(username: event.username, password: event.password),
         );
       } else if (repository != null) {
+        // اگر ریپازیتوری موجود است
         result = await repository!.login(
           username: event.username,
           password: event.password,
         );
       } else {
+        // اگر هیچ پیاده‌سازی موجود نیست
         emit(const AuthError('No authentication implementation provided.'));
         return;
       }
 
+      // پردازش نتیجه
       result.fold((failure) => emit(AuthError(failure.message)), (user) {
-        final userModel = user as UserModel;
+        final userModel = user as UserModel; // تبدیل به مدل کاربر
         localStorageService.saveUserSession(
+          // ذخیره سشن کاربر
           username: userModel.username,
           name: userModel.name ?? '',
           token: userModel.token ?? '',
           role: userModel.role,
         );
-        emit(AuthAuthenticated(user, showSavePasswordDialog: true));
+        emit(
+          AuthAuthenticated(user, showSavePasswordDialog: true),
+        ); // انتشار وضعیت احراز هویت شده
       });
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(e.toString())); // انتشار خطا
     }
   }
 
-  // Handles automatic login without save password dialog.
+  // متد _onAutoLogin - مدیریت ورود خودکار بدون دیالوگ ذخیره رمز عبور
   Future<void> _onAutoLogin(
     AutoLoginEvent event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
+    emit(const AuthLoading()); // انتشار وضعیت در حال بارگذاری
 
     try {
-      Either<Failure, User> result;
+      Either<Failure, User> result; // نتیجه عملیات
       if (loginUseCase != null) {
         result = await loginUseCase!(
           LoginParams(username: event.username, password: event.password),
@@ -87,6 +97,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
+      // پردازش نتیجه
       result.fold((failure) => emit(AuthError(failure.message)), (user) {
         final userModel = user as UserModel;
         localStorageService.saveUserSession(
@@ -95,47 +106,52 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           token: userModel.token ?? '',
           role: userModel.role,
         );
-        emit(AuthAuthenticated(user, showSavePasswordDialog: false));
+        emit(
+          AuthAuthenticated(user, showSavePasswordDialog: false),
+        ); // بدون دیالوگ ذخیره رمز
       });
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
 
-  // Handles user logout and clears session.
+  // متد _onLogout - مدیریت خروج کاربر و پاکسازی سشن
   Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
+    emit(const AuthLoading()); // انتشار وضعیت در حال بارگذاری
     try {
       if (repository != null) {
-        await repository!.logout();
+        await repository!.logout(); // خروج از ریپازیتوری
       }
-      await localStorageService.logout();
-      emit(const AuthUnauthenticated());
+      await localStorageService.logout(); // پاکسازی ذخیره‌سازی محلی
+      emit(const AuthUnauthenticated()); // انتشار وضعیت خارج شده
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
 
-  // Checks authentication status on app start
+  // متد _onCheckAuthStatus - بررسی وضعیت احراز هویت در شروع برنامه
   Future<void> _onCheckAuthStatus(
     CheckAuthStatusEvent event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
+    emit(const AuthLoading()); // انتشار وضعیت در حال بارگذاری
     try {
       if (repository != null) {
-        final res = await repository!.isLoggedIn();
+        final res = await repository!.isLoggedIn(); // بررسی وضعیت ورود
         res.fold((failure) => emit(const AuthUnauthenticated()), (
           isLogged,
         ) async {
           if (isLogged) {
-            final userRes = await repository!.getCurrentUser();
+            // اگر کاربر وارد شده
+            final userRes =
+                await repository!.getCurrentUser(); // دریافت کاربر فعلی
             userRes.fold(
               (f) => emit(const AuthUnauthenticated()),
-              (user) => emit(AuthAuthenticated(user)),
+              (user) =>
+                  emit(AuthAuthenticated(user)), // انتشار وضعیت احراز هویت شده
             );
           } else {
-            emit(const AuthUnauthenticated());
+            emit(const AuthUnauthenticated()); // انتشار وضعیت خارج شده
           }
         });
       } else {

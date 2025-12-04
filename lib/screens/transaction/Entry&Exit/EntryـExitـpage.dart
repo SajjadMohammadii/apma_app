@@ -1,7 +1,11 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
-import 'dart:async';
+// صفحه ورود و خروج - ثبت ساعت ورود و خروج کارمندان
+// مرتبط با: transaction.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'dart:async'; // کتابخانه async برای Timer
+
+// کلاس EntryExitPage - صفحه ورود و خروج
 class EntryExitPage extends StatefulWidget {
   const EntryExitPage({super.key});
 
@@ -9,22 +13,24 @@ class EntryExitPage extends StatefulWidget {
   State<EntryExitPage> createState() => _EntryExitPageState();
 }
 
+// کلاس _EntryExitPageState - state صفحه ورود و خروج
 class _EntryExitPageState extends State<EntryExitPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _pulseAnimation;
+  late AnimationController _animationController; // کنترلر انیمیشن
+  late Animation<double> _pulseAnimation; // انیمیشن پالس
 
-  bool _isCheckedIn = false;
-  String _currentTime = '';
-  String _currentDate = '';
+  bool _isCheckedIn = false; // وضعیت حضور (ورود شده یا خیر)
+  String _currentTime = ''; // زمان فعلی
+  String _currentDate = ''; // تاریخ فعلی
 
-  // داده‌های نمونه
+  // داده‌های نمونه - سوابق امروز
   final List<Map<String, dynamic>> _todayRecords = [
     {'type': 'entry', 'time': '08:30', 'status': 'تایید شده'},
     {'type': 'exit', 'time': '12:00', 'status': 'تایید شده'},
     {'type': 'entry', 'time': '13:00', 'status': 'تایید شده'},
   ];
 
+  // داده‌های نمونه - آمار هفتگی
   final List<Map<String, dynamic>> _weeklyStats = [
     {'day': 'شنبه', 'hours': '8:30', 'status': 'کامل'},
     {'day': 'یکشنبه', 'hours': '7:45', 'status': 'کسری'},
@@ -34,12 +40,14 @@ class _EntryExitPageState extends State<EntryExitPage>
     {'day': 'پنج شنبه', 'hours': '-', 'status': 'امروز'},
   ];
 
-  Timer? _timer;
+  Timer? _timer; // تایمر به‌روزرسانی زمان
 
   @override
+  // متد initState - مقداردهی اولیه انیمیشن و تایمر
   void initState() {
     super.initState();
-    _updateTime();
+    _updateTime(); // شروع به‌روزرسانی زمان
+    // تنظیم انیمیشن پالس
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -50,6 +58,7 @@ class _EntryExitPageState extends State<EntryExitPage>
     );
   }
 
+  // متد _updateTime - به‌روزرسانی زمان و تاریخ هر ثانیه
   void _updateTime() {
     if (!mounted) return;
 
@@ -61,19 +70,22 @@ class _EntryExitPageState extends State<EntryExitPage>
           '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
     });
 
-    _timer = Timer(const Duration(seconds: 1), _updateTime);
+    _timer = Timer(const Duration(seconds: 1), _updateTime); // تایمر بازگشتی
   }
 
   @override
+  // متد dispose - آزادسازی منابع
   void dispose() {
-    _timer?.cancel();
-    _animationController.dispose();
+    _timer?.cancel(); // لغو تایمر
+    _animationController.dispose(); // آزادسازی کنترلر انیمیشن
     super.dispose();
   }
 
+  // متد _toggleCheckIn - تغییر وضعیت ورود/خروج
   void _toggleCheckIn() {
     setState(() {
       _isCheckedIn = !_isCheckedIn;
+      // افزودن رکورد جدید
       _todayRecords.add({
         'type': _isCheckedIn ? 'entry' : 'exit',
         'time': _currentTime,
@@ -81,6 +93,7 @@ class _EntryExitPageState extends State<EntryExitPage>
       });
     });
 
+    // نمایش پیام موفقیت
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -95,9 +108,10 @@ class _EntryExitPageState extends State<EntryExitPage>
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(

@@ -1,15 +1,19 @@
-import 'dart:io';
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/screens/transaction/bankcheck/camera_preview_screen.dart';
-import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shamsi_date/shamsi_date.dart';
-import 'package:flutter/services.dart';
+// صفحه چک بانک - ثبت و مدیریت چک‌های بانکی
+// مرتبط با: bank_check.dart, camera_preview_screen.dart
 
+import 'dart:io'; // کتابخانه کار با فایل
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/screens/transaction/bankcheck/camera_preview_screen.dart'; // صفحه دوربین
+import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart'; // انتخابگر تاریخ
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:camera/camera.dart'; // کتابخانه دوربین
+import 'package:image_picker/image_picker.dart'; // انتخاب تصویر
+import 'package:permission_handler/permission_handler.dart'; // مدیریت دسترسی‌ها
+import 'package:shamsi_date/shamsi_date.dart'; // تاریخ شمسی
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+
+// کلاس BankPage - صفحه چک بانک
 class BankPage extends StatefulWidget {
   const BankPage({super.key});
 
@@ -17,8 +21,10 @@ class BankPage extends StatefulWidget {
   State<BankPage> createState() => _BankPageState();
 }
 
+// کلاس _BankPageState - state صفحه چک بانک
 class _BankPageState extends State<BankPage> {
-  String bankStatus = "واریز";
+  String bankStatus = "واریز"; // وضعیت بانکی انتخاب شده
+  // لیست وضعیت‌های بانکی
   final List<String> bankStatuses = [
     'واریز',
     'خواباندن',
@@ -27,36 +33,45 @@ class _BankPageState extends State<BankPage> {
     'مرجوع',
   ];
 
-  String? imagePath;
-  List<CameraDescription>? _cameras;
-  final ImagePicker _picker = ImagePicker();
+  String? imagePath; // مسیر تصویر چک
+  List<CameraDescription>? _cameras; // لیست دوربین‌ها
+  final ImagePicker _picker = ImagePicker(); // انتخابگر تصویر
 
-  final TextEditingController searchController = TextEditingController();
-  final TextEditingController accountController = TextEditingController();
-  final TextEditingController bankDateController = TextEditingController();
+  // کنترلرهای فیلدها
+  final TextEditingController searchController =
+      TextEditingController(); // جستجو
+  final TextEditingController accountController =
+      TextEditingController(); // حساب
+  final TextEditingController bankDateController =
+      TextEditingController(); // تاریخ
 
+  // بررسی پلتفرم موبایل
   bool get _isMobile {
     if (kIsWeb) return false;
     return Platform.isAndroid || Platform.isIOS;
   }
 
+  // بررسی پلتفرم دسکتاپ یا وب
   bool get _isDesktopOrWeb {
     if (kIsWeb) return true;
     return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
   }
 
   @override
+  // متد initState - مقداردهی اولیه
   void initState() {
     super.initState();
-    _setTodayDate();
+    _setTodayDate(); // تنظیم تاریخ امروز
   }
 
+  // متد _setTodayDate - تنظیم تاریخ امروز شمسی
   void _setTodayDate() {
     final now = Jalali.now();
     bankDateController.text =
         '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
   }
 
+  // متد _openDatePicker - باز کردن انتخابگر تاریخ
   Future<void> _openDatePicker() async {
     final selectedDate = await PersianDatePickerDialog.show(
       context,
@@ -67,6 +82,7 @@ class _BankPageState extends State<BankPage> {
     }
   }
 
+  // متد _openAttachment - باز کردن پیوست
   Future<void> _openAttachment() async {
     if (_isDesktopOrWeb) {
       // فقط گزینه فایل در دسکتاپ و وب
@@ -80,6 +96,7 @@ class _BankPageState extends State<BankPage> {
     }
   }
 
+  // متد _showAttachmentPicker - نمایش انتخابگر پیوست
   void _showAttachmentPicker() {
     showModalBottomSheet(
       context: context,

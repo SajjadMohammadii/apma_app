@@ -1,15 +1,20 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
+// دیالوگ فیلتر پیشرفته - فیلتر کردن داده‌ها بر اساس معیارهای مختلف
+// مرتبط با: price_management_page.dart, filter_button_widget.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس AdvancedFilterDialog - دیالوگ فیلتر پیشرفته
 class AdvancedFilterDialog extends StatefulWidget {
-  final TextEditingController numberController;
-  final TextEditingController customerController;
-  final TextEditingController issuerController;
-  final TextEditingController keywordsController;
-  final String initialSearchMode;
-  final Function(String) onApply;
-  final VoidCallback onClear;
+  final TextEditingController numberController; // کنترلر شماره
+  final TextEditingController customerController; // کنترلر مشتری
+  final TextEditingController issuerController; // کنترلر صادرکننده
+  final TextEditingController keywordsController; // کنترلر کلمات کلیدی
+  final String initialSearchMode; // حالت جستجو (AND/OR)
+  final Function(String) onApply; // callback اعمال فیلتر
+  final VoidCallback onClear; // callback پاک کردن
 
+  // سازنده
   const AdvancedFilterDialog({
     super.key,
     required this.numberController,
@@ -25,19 +30,22 @@ class AdvancedFilterDialog extends StatefulWidget {
   State<AdvancedFilterDialog> createState() => _AdvancedFilterDialogState();
 }
 
+// کلاس _AdvancedFilterDialogState - state دیالوگ فیلتر
 class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
-  late String selectedSearchMode;
+  late String selectedSearchMode; // حالت جستجوی انتخاب شده
 
   @override
+  // متد initState - مقداردهی اولیه
   void initState() {
     super.initState();
     selectedSearchMode = widget.initialSearchMode;
   }
 
   @override
+  // متد build - ساخت رابط کاربری دیالوگ
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Container(
@@ -49,30 +57,30 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(),
+                _buildHeader(), // هدر دیالوگ
                 const Divider(height: 20),
                 const SizedBox(height: 12),
                 _buildFilterTextField(
-                  'شماره پیش فاکتور',
+                  'شماره پیش فاکتور', // فیلد شماره
                   widget.numberController,
                   Icons.numbers,
                 ),
                 const SizedBox(height: 12),
                 _buildFilterTextField(
-                  'نام مشتری',
+                  'نام مشتری', // فیلد مشتری
                   widget.customerController,
                   Icons.person,
                 ),
                 const SizedBox(height: 12),
                 _buildFilterTextField(
-                  'صادرکننده',
+                  'صادرکننده', // فیلد صادرکننده
                   widget.issuerController,
                   Icons.person_outline,
                 ),
                 const SizedBox(height: 12),
-                _buildKeywordFilter(),
+                _buildKeywordFilter(), // فیلتر کلمات کلیدی
                 const SizedBox(height: 20),
-                _buildActionButtons(),
+                _buildActionButtons(), // دکمه‌های عملیات
               ],
             ),
           ),
@@ -81,18 +89,20 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     );
   }
 
+  // متد _buildHeader - ساخت هدر دیالوگ
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          'فیلتر پیشرفته',
+          'فیلتر پیشرفته', // عنوان
           style: TextStyle(
             fontFamily: 'Vazir',
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
+        // دکمه بستن
         IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
@@ -103,12 +113,13 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     );
   }
 
+  // متد _buildKeywordFilter - ساخت بخش فیلتر کلمات کلیدی
   Widget _buildKeywordFilter() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'جستجو بر اساس کلمات کلیدی',
+          'جستجو بر اساس کلمات کلیدی', // عنوان
           style: TextStyle(
             fontFamily: 'Vazir',
             fontSize: 12,
@@ -116,6 +127,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
           ),
         ),
         const SizedBox(height: 6),
+        // فیلد ورودی کلمات کلیدی
         TextField(
           controller: widget.keywordsController,
           decoration: InputDecoration(
@@ -150,6 +162,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
           style: const TextStyle(fontFamily: 'Vazir', fontSize: 12),
         ),
         const SizedBox(height: 8),
+        // انتخاب حالت جستجو (AND/OR)
         Row(
           children: [
             Expanded(child: _buildSearchModeOption('AND', 'همه کلمات (و)')),
@@ -158,17 +171,18 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
           ],
         ),
         const SizedBox(height: 8),
-        _buildInfoBox(),
+        _buildInfoBox(), // باکس اطلاعات
       ],
     );
   }
 
+  // متد _buildSearchModeOption - ساخت گزینه حالت جستجو
   Widget _buildSearchModeOption(String mode, String label) {
     final isSelected = selectedSearchMode == mode;
     return InkWell(
       onTap: () {
         setState(() {
-          selectedSearchMode = mode;
+          selectedSearchMode = mode; // تغییر حالت
         });
       },
       child: Container(
@@ -187,6 +201,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // آیکون رادیو
             Icon(
               isSelected
                   ? Icons.radio_button_checked
@@ -210,6 +225,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     );
   }
 
+  // متد _buildInfoBox - ساخت باکس اطلاعات راهنما
   Widget _buildInfoBox() {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -228,6 +244,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
+              // توضیح حالت جستجو
               selectedSearchMode == 'AND'
                   ? 'نتایج باید شامل تمام کلمات باشند'
                   : 'نتایج باید شامل حداقل یکی از کلمات باشند',
@@ -243,10 +260,11 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     );
   }
 
+  // متد _buildFilterTextField - ساخت فیلد متنی فیلتر
   Widget _buildFilterTextField(
-    String label,
-    TextEditingController controller,
-    IconData icon,
+    String label, // برچسب
+    TextEditingController controller, // کنترلر
+    IconData icon, // آیکون
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,9 +311,11 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     );
   }
 
+  // متد _buildActionButtons - ساخت دکمه‌های عملیات
   Widget _buildActionButtons() {
     return Row(
       children: [
+        // دکمه پاک کردن
         Expanded(
           child: OutlinedButton(
             onPressed: () {
@@ -313,6 +333,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
           ),
         ),
         const SizedBox(width: 12),
+        // دکمه اعمال فیلتر
         Expanded(
           child: ElevatedButton(
             onPressed: () {

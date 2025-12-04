@@ -1,25 +1,31 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart';
-import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart';
-import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
-import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart';
+// صفحه عملیات - نمایش آیتم‌های منو برای هر دسته‌بندی
+// مرتبط با: home_page.dart, price_management_page.dart, bank_check.dart
 
-import 'package:flutter/material.dart';
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart'; // صفحه تحویل مرسولات
+import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart'; // صفحه ورود و خروج
+import 'package:apma_app/screens/transaction/price_management/price_management_page.dart'; // صفحه مدیریت بها
+import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart'; // صفحه چک بانکی
 
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس TransactionPage - صفحه عملیات
 class TransactionPage extends StatelessWidget {
-  final String category;
+  final String category; // دسته‌بندی انتخاب شده
 
+  // سازنده با دسته‌بندی پیش‌فرض مالی
   const TransactionPage({super.key, this.category = 'مالی'});
 
   @override
+  // متد build - ساخت رابط کاربری صفحه عملیات
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
-        backgroundColor: AppColors.primaryGreen,
+        backgroundColor: AppColors.primaryGreen, // رنگ پس‌زمینه
         appBar: AppBar(
           title: const Text(
-            'عملیات',
+            'عملیات', // عنوان صفحه
             style: TextStyle(fontFamily: 'Vazir', color: Colors.white),
           ),
           backgroundColor: AppColors.primaryGreen,
@@ -30,20 +36,22 @@ class TransactionPage extends StatelessWidget {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // برگشت
             },
           ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _buildCategoryContent(),
+          child: _buildCategoryContent(), // ساخت محتوای دسته‌بندی
         ),
       ),
     );
   }
 
+  // متد _buildCategoryContent - ساخت محتوا بر اساس دسته‌بندی
   Widget _buildCategoryContent() {
     if (category == 'مالی') {
+      // دسته مالی
       return Column(
         children: [
           _buildMenuItem(
@@ -53,6 +61,7 @@ class TransactionPage extends StatelessWidget {
         ],
       );
     } else if (category == 'تسهیل دار') {
+      // دسته تسهیل دار
       return Column(
         children: [
           _buildMenuItem(title: 'چک', imagePath: 'assets/images/bankcheck.png'),
@@ -64,6 +73,7 @@ class TransactionPage extends StatelessWidget {
         ],
       );
     } else if (category == 'پرسنلی') {
+      // دسته پرسنلی
       return Column(
         children: [
           _buildMenuItem(
@@ -73,6 +83,7 @@ class TransactionPage extends StatelessWidget {
         ],
       );
     } else {
+      // دسته بدون محتوا
       return const Center(
         child: Text(
           'محتوایی موجود نیست',
@@ -86,11 +97,15 @@ class TransactionPage extends StatelessWidget {
     }
   }
 
+  // متد _buildMenuItem - ساخت آیتم منو
+  // پارامتر title: عنوان آیتم
+  // پارامتر imagePath: مسیر تصویر آیکون
   Widget _buildMenuItem({required String title, required String imagePath}) {
     return Builder(
       builder: (context) {
         return InkWell(
           onTap: () {
+            // ناوبری بر اساس عنوان آیتم
             if (title == 'مدیریت بها') {
               Navigator.push(
                 context,
@@ -121,6 +136,7 @@ class TransactionPage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
+              // گرادیانت بنفش
               gradient: const LinearGradient(
                 colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
                 begin: Alignment.centerRight,
@@ -137,6 +153,7 @@ class TransactionPage extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // عنوان آیتم
                 Text(
                   title,
                   style: const TextStyle(
@@ -147,6 +164,7 @@ class TransactionPage extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                // آیکون آیتم
                 Container(
                   width: 64,
                   height: 64,
@@ -161,6 +179,7 @@ class TransactionPage extends StatelessWidget {
                     height: 40,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
+                      // آیکون جایگزین در صورت خطا
                       return const Icon(
                         Icons.image_not_supported,
                         color: Colors.white54,

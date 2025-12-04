@@ -2,8 +2,12 @@ import 'package:apma_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
+/// ویجت دیالوگ انتخاب تاریخ جلالی (شمسی)
 class PersianDatePickerDialog extends StatefulWidget {
+  /// تاریخ اولیه که باید انتخاب شده باشد (فرمت: yyyy/mm/dd)
   final String initialDate;
+
+  /// کال‌بک برای زمانی که کاربر تاریخ را انتخاب کرد
   final Function(String) onDateSelected;
 
   const PersianDatePickerDialog({
@@ -16,30 +20,36 @@ class PersianDatePickerDialog extends StatefulWidget {
   State<PersianDatePickerDialog> createState() =>
       _PersianDatePickerDialogState();
 
-  // متد استاتیک برای نمایش دیالوگ
+  /// متد استاتیک برای نمایش ساده‌تر دیالوگ و برگشت تاریخ انتخاب شده
   static Future<String?> show(BuildContext context, String initialDate) async {
     String? selectedDate;
+
+    // نمایش دیالوگ
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return PersianDatePickerDialog(
           initialDate: initialDate,
           onDateSelected: (date) {
-            selectedDate = date;
+            selectedDate = date; // ذخیره تاریخ انتخاب شده
           },
         );
       },
     );
-    return selectedDate;
+
+    return selectedDate; // خروجی نهایی
   }
 }
 
 class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
+  /// تاریخ انتخاب‌شده (جلالی)
   late Jalali selectedDate;
 
   @override
   void initState() {
     super.initState();
+
+    /// تبدیل تاریخ اولیه از رشته به Jalali
     try {
       List<String> parts = widget.initialDate.split('/');
       selectedDate = Jalali(
@@ -48,6 +58,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
         int.parse(parts[2]),
       );
     } catch (e) {
+      /// اگر تاریخ ورودی اشتباه بود، تاریخ امروز قرار می‌گیرد
       selectedDate = Jalali.now();
     }
   }
@@ -55,6 +66,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
+      /// تنظیم جهت راست‌به‌چپ مخصوص فارسی
       textDirection: TextDirection.rtl,
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -70,12 +82,23 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 8),
+
+                  /// هدر شامل نام ماه و دکمه‌های جابه‌جایی
                   _buildHeader(),
+
                   const SizedBox(height: 4),
+
+                  /// نمایش نام روزهای هفته
                   _buildWeekDays(),
+
                   const Divider(height: 8),
+
+                  /// نمایش تقویم ۶ هفته‌ای
                   _buildCalendar(),
+
                   const SizedBox(height: 12),
+
+                  /// دکمه‌های امروز / انصراف / تأیید
                   _buildButtons(),
                 ],
               ),
@@ -86,6 +109,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
     );
   }
 
+  /// ساخت هدر شامل دکمه تغییر ماه و نمایش نام ماه
   Widget _buildHeader() {
     return Container(
       height: 40,
@@ -97,6 +121,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          /// دکمه ماه قبل
           IconButton(
             icon: const Icon(Icons.chevron_left, size: 24),
             onPressed: () {
@@ -105,6 +130,8 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
               });
             },
           ),
+
+          /// نام ماه + سال
           Text(
             '${selectedDate.formatter.mN} ${selectedDate.year}',
             style: const TextStyle(
@@ -114,6 +141,8 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
               color: AppColors.primaryGreen,
             ),
           ),
+
+          /// دکمه ماه بعد
           IconButton(
             icon: const Icon(Icons.chevron_right, size: 24),
             onPressed: () {
@@ -127,6 +156,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
     );
   }
 
+  /// ساخت ردیف نام روزهای هفته
   Widget _buildWeekDays() {
     return Row(
       children:
@@ -150,6 +180,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
     );
   }
 
+  /// ساخت تقویم شامل ۶ × ۷ خانه = ۴۲ سلول
   Widget _buildCalendar() {
     return SizedBox(
       height: 130,
@@ -159,37 +190,48 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
+            crossAxisCount: 7, // 7 ستون: روزهای هفته
             childAspectRatio: 1,
             crossAxisSpacing: 4,
             mainAxisSpacing: 4,
           ),
-          itemCount: 42,
+          itemCount: 42, // همیشه ۶ هفته (برای نظم)
           itemBuilder: (context, index) {
+            /// پیدا کردن روز شروع ماه
             final firstDayOfMonth = Jalali(
               selectedDate.year,
               selectedDate.month,
               1,
             );
-            final weekDay = firstDayOfMonth.weekDay;
-            final daysInMonth = selectedDate.monthLength;
 
+            final weekDay = firstDayOfMonth.weekDay; // شماره روز شروع
+            final daysInMonth = selectedDate.monthLength; // تعداد روزهای ماه
+
+            /// خانه‌های قبل و بعد از ماه را خالی می‌کنیم
             if (index < weekDay || index >= weekDay + daysInMonth) {
               return const SizedBox.shrink();
             }
 
+            /// محاسبه شماره روز
             final day = index - weekDay + 1;
+
+            /// آیا این روز انتخاب شده؟
             final isSelected = day == selectedDate.day;
+
+            /// آیا این روز امروز است؟
             final isToday =
                 Jalali.now().year == selectedDate.year &&
                 Jalali.now().month == selectedDate.month &&
                 Jalali.now().day == day;
+
+            /// آیا این روز جمعه است؟
             final isFriday = index % 7 == 6;
 
             return Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
+                  /// هنگام کلیک، روز انتخاب می‌شود
                   setState(() {
                     selectedDate = Jalali(
                       selectedDate.year,
@@ -201,16 +243,20 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   decoration: BoxDecoration(
+                    /// رنگ پس‌زمینه
                     color:
                         isSelected
                             ? AppColors
-                                .primaryGreen // اگر انتخاب شده → سبز
+                                .primaryGreen // انتخاب شده
                             : isFriday
                             ? Colors
                                 .red
-                                .shade50 // اگر جمعه باشد → قرمز روشن
+                                .shade50 // جمعه
                             : Colors.transparent,
+
                     borderRadius: BorderRadius.circular(8),
+
+                    /// استایل بوردر برای امروز یا جمعه
                     border:
                         isToday && !isSelected
                             ? Border.all(
@@ -218,11 +264,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                               width: 2,
                             )
                             : isFriday && !isSelected
-                            ? Border.all(
-                              color:
-                                  Colors.red.shade200, // border قرمز برای جمعه
-                              width: 1,
-                            )
+                            ? Border.all(color: Colors.red.shade200, width: 1)
                             : null,
                   ),
                   child: Center(
@@ -237,9 +279,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                                 : isToday
                                 ? AppColors.primaryGreen
                                 : isFriday
-                                ? Colors
-                                    .red
-                                    .shade700 // متن قرمز برای جمعه
+                                ? Colors.red.shade700
                                 : Colors.black87,
                         fontWeight:
                             isSelected || isToday
@@ -257,11 +297,12 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
     );
   }
 
+  /// دکمه‌های پایین دیالوگ شامل: امروز – انصراف – تأیید
   Widget _buildButtons() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // دکمه "امروز"
+        /// دکمه "امروز"
         Align(
           alignment: Alignment.centerRight,
           child: Container(
@@ -274,6 +315,7 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
               ),
             ),
             child: TextButton.icon(
+              /// انتخاب سریع تاریخ امروز
               onPressed: () {
                 setState(() {
                   selectedDate = Jalali.now();
@@ -304,11 +346,14 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
             ),
           ),
         ),
+
         const SizedBox(height: 4),
-        // دکمه‌های انصراف و تأیید
+
+        /// دکمه‌های انصراف و تأیید
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            /// دکمه انصراف
             Expanded(
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
@@ -326,13 +371,21 @@ class _PersianDatePickerDialogState extends State<PersianDatePickerDialog> {
                 ),
               ),
             ),
+
             const SizedBox(width: 12),
+
+            /// دکمه تأیید
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
+                  /// تبدیل تاریخ جلالی به فرمت yyyy/mm/dd
                   String formatted =
                       '${selectedDate.year}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.day.toString().padLeft(2, '0')}';
+
+                  /// ارسال تاریخ انتخاب شده به کال‌بک
                   widget.onDateSelected(formatted);
+
+                  /// بستن دیالوگ
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(

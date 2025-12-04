@@ -1,64 +1,77 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/core/services/permission_service.dart';
-import 'package:apma_app/core/widgets/apmaco_logo.dart';
-import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'dart:developer' as developer;
+// ویجت دیالوگ درخواست دسترسی‌ها - نمایش لیست دسترسی‌های مورد نیاز و دکمه اعطا
+// مرتبط با: permission_service.dart, permission_mixin.dart, app_colors.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/core/services/permission_service.dart'; // سرویس دسترسی‌ها
+import 'package:apma_app/core/widgets/apmaco_logo.dart'; // ویجت لوگو
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:permission_handler/permission_handler.dart'; // کتابخانه مدیریت دسترسی
+import 'dart:developer' as developer; // ابزار لاگ‌گیری
+
+// کلاس PermissionDialog - دیالوگ درخواست دسترسی‌ها
 class PermissionDialog extends StatefulWidget {
-  final VoidCallback onPermissionsGranted;
+  final VoidCallback onPermissionsGranted; // callback هنگام اعطای دسترسی‌ها
 
+  // سازنده با callback اجباری
   const PermissionDialog({required this.onPermissionsGranted, super.key});
 
   @override
   State<PermissionDialog> createState() => _PermissionDialogState();
 }
 
+// کلاس _PermissionDialogState - state دیالوگ با انیمیشن
 class _PermissionDialogState extends State<PermissionDialog>
     with SingleTickerProviderStateMixin {
-  bool _isRequesting = false;
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+  bool _isRequesting = false; // متغیر وضعیت در حال درخواست
+  late AnimationController _animationController; // کنترلر انیمیشن
+  late Animation<double> _scaleAnimation; // انیمیشن مقیاس
 
   @override
+  // متد initState - مقداردهی اولیه انیمیشن
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300), // مدت انیمیشن ۳۰۰ میلی‌ثانیه
     );
     _scaleAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeOutBack,
+      curve: Curves.easeOutBack, // منحنی انیمیشن
     );
-    _animationController.forward();
+    _animationController.forward(); // شروع انیمیشن
   }
 
   @override
+  // متد dispose - آزادسازی کنترلر انیمیشن
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
 
+  // متد _requestPermissions - درخواست دسترسی‌ها
   Future<void> _requestPermissions() async {
-    setState(() => _isRequesting = true);
+    setState(() => _isRequesting = true); // شروع درخواست
 
-    final allGranted = await PermissionService.requestAllPermissions();
+    final allGranted =
+        await PermissionService.requestAllPermissions(); // درخواست دسترسی‌ها
 
-    setState(() => _isRequesting = false);
+    setState(() => _isRequesting = false); // پایان درخواست
 
     if (allGranted) {
+      // اگر همه دسترسی‌ها داده شد
       developer.log('✅ تمام دسترسی‌ها موافقت کردند');
-      widget.onPermissionsGranted();
-      if (mounted) Navigator.pop(context);
+      widget.onPermissionsGranted(); // فراخوانی callback
+      if (mounted) Navigator.pop(context); // بستن دیالوگ
     } else {
+      // اگر برخی دسترسی‌ها رد شدند
       developer.log('⚠️ برخی دسترسی‌ها رد شدند');
 
       if (mounted) {
+        // نمایش پیام هشدار
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('لطفاً تمام دسترسی‌های لازم را اعطا کنید'),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.error, // رنگ قرمز
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -70,19 +83,20 @@ class _PermissionDialogState extends State<PermissionDialog>
   }
 
   @override
+  // متد build - ساخت رابط کاربری دیالوگ
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: false, // جلوگیری از بستن با دکمه برگشت
       child: ScaleTransition(
-        scale: _scaleAnimation,
+        scale: _scaleAnimation, // اعمال انیمیشن مقیاس
         child: Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(24), // گوشه‌های گرد
           ),
-          elevation: 16,
+          elevation: 16, // سایه
           backgroundColor: Colors.white,
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 380),
+            constraints: const BoxConstraints(maxWidth: 380), // حداکثر عرض
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -94,7 +108,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          AppColors.primaryOrange,
+                          AppColors.primaryOrange, // رنگ نارنجی اصلی
                           AppColors.primaryOrange.withOpacity(0.8),
                         ],
                         begin: Alignment.topLeft,
@@ -121,11 +135,14 @@ class _PermissionDialogState extends State<PermissionDialog>
                               ),
                             ],
                           ),
-                          child: const ApmacoLogo(width: 120, height: 40),
+                          child: const ApmacoLogo(
+                            width: 120,
+                            height: 40,
+                          ), // ویجت لوگو
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'دسترسی‌های مورد نیاز',
+                          'دسترسی‌های مورد نیاز', // عنوان
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -137,13 +154,13 @@ class _PermissionDialogState extends State<PermissionDialog>
                     ),
                   ),
 
-                  // محتوا
+                  // محتوا - لیست دسترسی‌ها
                   Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
                         Text(
-                          'برای استفاده بهتر از برنامه، لطفاً دسترسی‌های زیر را اعطا کنید:',
+                          'برای استفاده بهتر از برنامه، لطفاً دسترسی‌های زیر را اعطا کنید:', // توضیحات
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.grey[600],
@@ -172,7 +189,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                                 'برای اسکن بارکد و تصویربرداری',
                                 Colors.blue,
                               ),
-                              _divider(),
+                              _divider(), // خط جداکننده
                               _permissionTile(
                                 Icons.mic_rounded,
                                 'میکروفن',
@@ -226,7 +243,9 @@ class _PermissionDialogState extends State<PermissionDialog>
                           height: 50,
                           child: ElevatedButton(
                             onPressed:
-                                _isRequesting ? null : _requestPermissions,
+                                _isRequesting
+                                    ? null
+                                    : _requestPermissions, // غیرفعال در حین درخواست
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryOrange,
                               foregroundColor: Colors.white,
@@ -241,6 +260,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                             child:
                                 _isRequesting
                                     ? const SizedBox(
+                                      // نمایش لودینگ در حین درخواست
                                       height: 24,
                                       width: 24,
                                       child: CircularProgressIndicator(
@@ -252,6 +272,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                                       ),
                                     )
                                     : const Row(
+                                      // نمایش متن و آیکون دکمه
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
@@ -275,9 +296,10 @@ class _PermissionDialogState extends State<PermissionDialog>
 
                         const SizedBox(height: 12),
 
-                        // دکمه تنظیمات
+                        // دکمه تنظیمات - برای باز کردن تنظیمات دستگاه
                         TextButton.icon(
-                          onPressed: () => openAppSettings(),
+                          onPressed:
+                              () => openAppSettings(), // باز کردن تنظیمات
                           icon: Icon(
                             Icons.settings_rounded,
                             color: AppColors.primaryGray,
@@ -304,6 +326,11 @@ class _PermissionDialogState extends State<PermissionDialog>
     );
   }
 
+  // متد _permissionTile - ساخت آیتم لیست دسترسی
+  // پارامتر icon: آیکون دسترسی
+  // پارامتر title: عنوان دسترسی
+  // پارامتر subtitle: توضیحات دسترسی
+  // پارامتر color: رنگ آیکون
   Widget _permissionTile(
     IconData icon,
     String title,
@@ -317,7 +344,7 @@ class _PermissionDialogState extends State<PermissionDialog>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(0.1), // پس‌زمینه با شفافیت
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 22),
@@ -328,7 +355,7 @@ class _PermissionDialogState extends State<PermissionDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  title, // عنوان
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -337,7 +364,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  subtitle,
+                  subtitle, // توضیحات
                   style: TextStyle(
                     color: Colors.grey[500],
                     fontSize: 11,
@@ -352,13 +379,14 @@ class _PermissionDialogState extends State<PermissionDialog>
     );
   }
 
+  // متد _divider - ساخت خط جداکننده بین آیتم‌ها
   Widget _divider() {
     return Divider(
       height: 1,
       thickness: 1,
       color: Colors.grey[200],
-      indent: 16,
-      endIndent: 16,
+      indent: 16, // فاصله از چپ
+      endIndent: 16, // فاصله از راست
     );
   }
 }

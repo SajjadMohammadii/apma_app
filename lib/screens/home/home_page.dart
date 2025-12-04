@@ -1,44 +1,50 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/core/constants/app_constant.dart';
-import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:apma_app/features/auth/presentation/bloc/auth_event.dart';
-import 'package:apma_app/features/auth/presentation/bloc/auth_state.dart';
-import 'package:apma_app/screens/%20notifications/notification_page.dart';
-import 'package:apma_app/screens/auth/login_page.dart';
-import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart';
-import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart';
+// صفحه اصلی برنامه با منوی کشویی و دسته‌بندی‌ها
+// مرتبط با: login_page.dart, auth_bloc.dart, transaction.dart
 
-import 'package:apma_app/screens/transaction/transaction.dart';
-import 'package:apma_app/screens/messages/messages_page.dart';
-import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart';
-import 'package:apma_app/screens/transaction/price_management/price_management_page.dart';
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/core/constants/app_constant.dart'; // ثابت‌های برنامه
+import 'package:apma_app/features/auth/presentation/bloc/auth_bloc.dart'; // بلاک احراز هویت
+import 'package:apma_app/features/auth/presentation/bloc/auth_event.dart'; // رویدادهای بلاک
+import 'package:apma_app/features/auth/presentation/bloc/auth_state.dart'; // وضعیت‌های بلاک
+import 'package:apma_app/screens/%20notifications/notification_page.dart'; // صفحه اعلان‌ها
+import 'package:apma_app/screens/auth/login_page.dart'; // صفحه ورود
+import 'package:apma_app/screens/transaction/Entry&Exit/Entry%D9%80Exit%D9%80page.dart'; // صفحه ورود و خروج
+import 'package:apma_app/screens/transaction/delivery_parcels/delivery_parcels.dart'; // صفحه تحویل مرسولات
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:apma_app/screens/transaction/transaction.dart'; // صفحه عملیات
+import 'package:apma_app/screens/messages/messages_page.dart'; // صفحه پیام‌ها
+import 'package:apma_app/screens/transaction/bankcheck/bankـcheck.dart'; // صفحه چک بانکی
+import 'package:apma_app/screens/transaction/price_management/price_management_page.dart'; // صفحه مدیریت بها
 
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:flutter_bloc/flutter_bloc.dart'; // کتابخانه BLoC
+
+// کلاس HomePage - صفحه اصلی پس از ورود
 class HomePage extends StatefulWidget {
-  final String username;
-  final String? name;
-  final String? role;
+  final String username; // نام کاربری
+  final String? name; // نام کاربر
+  final String? role; // نقش کاربر
 
+  // سازنده با پارامترهای کاربر
   const HomePage({super.key, required this.username, this.name, this.role});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
+// کلاس _HomePageState - state صفحه اصلی
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  String _selectedCategory = 'مالی';
-  List<Map<String, dynamic>> favoriteItems = [];
+  int _selectedIndex = 0; // ایندکس تب انتخاب شده
+  String _selectedCategory = 'مالی'; // دسته‌بندی انتخاب شده
+  List<Map<String, dynamic>> favoriteItems = []; // لیست آیتم‌های مورد علاقه
 
   // لیست تمام صفحات قابل دسترس
   final List<Map<String, dynamic>> availablePages = [
     {
-      'title': 'مدیریت بها',
-      'icon': Icons.analytics,
-      'route': '/price_management',
-      'widget': null, // Will be set dynamically
+      'title': 'مدیریت بها', // عنوان
+      'icon': Icons.analytics, // آیکون
+      'route': '/price_management', // مسیر
+      'widget': null, // ویجت (تنظیم پویا)
     },
     {
       'title': 'چک',
@@ -60,27 +66,32 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  // لیست دسته‌بندی‌ها
   final List<String> _categories = [
-    'مالی',
-    'تولید',
-    'ارتباط با مشتری',
-    'پرسنلی',
-    'تسهیل دار',
+    'مالی', // مالی
+    'تولید', // تولید
+    'ارتباط با مشتری', // CRM
+    'پرسنلی', // HR
+    'تسهیل دار', // تسهیلات
   ];
 
   @override
+  // متد build - ساخت رابط کاربری صفحه اصلی
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
+      // گوش دادن به تغییرات وضعیت احراز هویت
       listener: (context, state) {
         if (state is AuthUnauthenticated) {
+          // اگر خارج شد، برگرد به صفحه ورود
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
+        backgroundColor: AppColors.backgroundColor, // رنگ پس‌زمینه
         appBar: AppBar(
+          // نوار بالای صفحه
           title: Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Container(
@@ -90,6 +101,7 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
               ),
+              // دراپ‌داون انتخاب دسته‌بندی
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _selectedCategory,
@@ -146,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       setState(() {
-                        _selectedCategory = newValue;
+                        _selectedCategory = newValue; // تغییر دسته‌بندی
                       });
                     }
                   },
@@ -158,6 +170,7 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           backgroundColor: AppColors.primaryGreen,
           automaticallyImplyLeading: false,
+          // آیکون‌های سمت چپ (پیام و اعلان)
           leading: Row(
             children: [
               Expanded(
@@ -165,6 +178,7 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.message_outlined, size: 24),
                   padding: EdgeInsets.only(left: 6),
                   onPressed: () {
+                    // رفتن به صفحه پیام‌ها
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -180,6 +194,7 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.notifications_outlined, size: 24),
                   padding: EdgeInsets.only(left: 4),
                   onPressed: () {
+                    // رفتن به صفحه اعلان‌ها
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -191,12 +206,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
+          // عنوان و دکمه منو سمت راست
           actions: [
             const Padding(
               padding: EdgeInsets.only(left: 4),
               child: Center(
                 child: Text(
-                  'پنل کاربری',
+                  'پنل کاربری', // عنوان صفحه
                   style: TextStyle(
                     fontSize: 16,
                     fontFamily: 'Vazir',
@@ -210,24 +226,26 @@ class _HomePageState extends State<HomePage> {
                   (context) => IconButton(
                     icon: const Icon(Icons.menu, size: 24),
                     onPressed: () {
-                      Scaffold.of(context).openEndDrawer();
+                      Scaffold.of(
+                        context,
+                      ).openEndDrawer(); // باز کردن منوی کشویی
                     },
                   ),
             ),
           ],
         ),
-        endDrawer: _buildDrawer(context),
+        endDrawer: _buildDrawer(context), // منوی کشویی
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.paddingMedium),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildUserCard(context),
+                _buildUserCard(context), // کارت اطلاعات کاربر
                 const SizedBox(height: 20),
-                _buildTabBar(),
+                _buildTabBar(), // نوار تب‌ها
                 const SizedBox(height: 16),
-                _buildTabContent(),
+                _buildTabContent(), // محتوای تب
               ],
             ),
           ),

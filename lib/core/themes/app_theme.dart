@@ -1,34 +1,35 @@
-// Application theme configuration for Material Design.
-// Relates to: main.dart, app_colors.dart
+// تنظیمات تم برنامه برای متریال دیزاین
+// مرتبط با: main.dart, app_colors.dart
 
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/core/constants/app_constant.dart';
-import 'package:flutter/material.dart';
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/core/constants/app_constant.dart'; // ثابت‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
 
+// کلاس AppTheme - تم‌های برنامه
 class AppTheme {
+  // getter lightTheme - تم روشن برنامه
   static ThemeData get lightTheme {
     return ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Vazir',
-
-      // Color Scheme
+      useMaterial3: true, // استفاده از Material 3
+      fontFamily: 'Vazir', // فونت پیش‌فرض وزیر
+      // طرح رنگ
       colorScheme: ColorScheme.light(
-        primary: AppColors.primaryGreen,
-        secondary: AppColors.primaryOrange,
-        surface: Colors.white,
-        background: AppColors.backgroundColor,
-        error: AppColors.error,
+        primary: AppColors.primaryGreen, // رنگ اصلی
+        secondary: AppColors.primaryOrange, // رنگ ثانویه
+        surface: Colors.white, // رنگ سطوح
+        background: AppColors.backgroundColor, // رنگ پس‌زمینه
+        error: AppColors.error, // رنگ خطا
       ),
 
-      // Scaffold
+      // پس‌زمینه Scaffold
       scaffoldBackgroundColor: AppColors.backgroundColor,
 
-      // AppBar Theme
+      // تم AppBar
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: AppColors.textWhite,
-        elevation: 0,
-        centerTitle: true,
+        backgroundColor: AppColors.primaryGreen, // پس‌زمینه AppBar
+        foregroundColor: AppColors.textWhite, // رنگ متن و آیکون
+        elevation: 0, // بدون سایه
+        centerTitle: true, // عنوان در مرکز
         titleTextStyle: TextStyle(
           fontFamily: 'Vazir',
           fontSize: 18,
@@ -37,43 +38,53 @@ class AppTheme {
         ),
       ),
 
-      // Input Decoration Theme
+      // تم فیلدهای ورودی
       inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.inputBackground,
+        filled: true, // پر شده با رنگ
+        fillColor: AppColors.inputBackground, // رنگ پس‌زمینه
         contentPadding: EdgeInsets.symmetric(
           horizontal: AppConstants.paddingMedium,
           vertical: AppConstants.paddingMedium,
         ),
         border: OutlineInputBorder(
+          // حاشیه پیش‌فرض
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide.none, // بدون خط
         ),
         enabledBorder: OutlineInputBorder(
+          // حاشیه فعال
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
+          // حاشیه هنگام فوکوس
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide(color: AppColors.inputFocused, width: 2),
         ),
         errorBorder: OutlineInputBorder(
+          // حاشیه هنگام خطا
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
+        hintStyle: TextStyle(
+          color: AppColors.textHint,
+          fontSize: 14,
+        ), // استایل راهنما
       ),
 
-      // Elevated Button Theme
+      // تم دکمه ElevatedButton
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.buttonPrimary,
-          foregroundColor: AppColors.textWhite,
-          minimumSize: Size(double.infinity, AppConstants.buttonHeight),
+          backgroundColor: AppColors.buttonPrimary, // رنگ پس‌زمینه
+          foregroundColor: AppColors.textWhite, // رنگ متن
+          minimumSize: Size(
+            double.infinity,
+            AppConstants.buttonHeight,
+          ), // اندازه حداقل
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
-          elevation: 0,
+          elevation: 0, // بدون سایه
           textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -82,36 +93,48 @@ class AppTheme {
         ),
       ),
 
-      // Text Theme
+      // تم متن‌ها
       textTheme: TextTheme(
         displayLarge: TextStyle(
+          // متن نمایشی بزرگ
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
         displayMedium: TextStyle(
+          // متن نمایشی متوسط
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
         displaySmall: TextStyle(
+          // متن نمایشی کوچک
           fontSize: 24,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
         headlineMedium: TextStyle(
+          // عنوان متوسط
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         titleLarge: TextStyle(
+          // عنوان بزرگ
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
-        bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          color: AppColors.textPrimary,
+        ), // متن بدنه بزرگ
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          color: AppColors.textSecondary,
+        ), // متن بدنه متوسط
         labelLarge: TextStyle(
+          // برچسب بزرگ
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,

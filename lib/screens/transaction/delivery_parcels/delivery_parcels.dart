@@ -1,10 +1,14 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
-import 'delivery_nearby_page.dart';
+// صفحه تحویل مرسولات - نمایش لیست مرسولات و انتخاب مکان تحویل
+// مرتبط با: transaction.dart, delivery_nearby_page.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+import 'dart:io'; // کتابخانه کار با فایل
+import 'delivery_nearby_page.dart'; // صفحه مرسولات نزدیک
+
+// کلاس DeliveryParcelsPage - صفحه تحویل مرسولات
 class DeliveryParcelsPage extends StatefulWidget {
   const DeliveryParcelsPage({super.key});
 
@@ -12,32 +16,37 @@ class DeliveryParcelsPage extends StatefulWidget {
   State<DeliveryParcelsPage> createState() => _DeliveryParcelsPageState();
 }
 
+// کلاس _DeliveryParcelsPageState - state صفحه تحویل مرسولات
 class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController =
+      TextEditingController(); // کنترلر جستجو
 
   // داده‌های جدول
   final List<Map<String, dynamic>> _deliveryData = [];
 
   // مکان انتخاب شده
-  String? _selectedLocation;
-  String? _selectedSubLocation;
+  String? _selectedLocation; // مکان اصلی
+  String? _selectedSubLocation; // زیرمجموعه
 
-  // ساختار مکان‌ها
+  // ساختار مکان‌ها و زیرمجموعه‌ها
   final Map<String, List<String>> _locations = {
     'انبار تهران': ['انبار شماره ۱', 'انبار شماره ۲'],
     'محل مشتری': ['دفتر مرکزی', 'کارخانه'],
     'محل باربری': ['وطن', 'شمال', 'تیپاکس'],
   };
 
+  // بررسی پلتفرم موبایل
   bool get _isMobile {
     if (kIsWeb) return false;
     return Platform.isAndroid || Platform.isIOS;
   }
 
   @override
+  // متد initState - مقداردهی اولیه و تنظیم جهت صفحه
   void initState() {
     super.initState();
     if (_isMobile) {
+      // تنظیم جهت صفحه به افقی در موبایل
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
@@ -46,6 +55,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
   }
 
   @override
+  // متد dispose - برگرداندن جهت صفحه به عمودی
   void dispose() {
     if (_isMobile) {
       SystemChrome.setPreferredOrientations([
@@ -58,11 +68,12 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: _buildAppBar(),
@@ -74,7 +85,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
                 // باکس سرچ در وسط
                 Center(child: _buildSearchBox()),
                 const SizedBox(height: 12),
-                // جدول
+                // جدول مرسولات
                 Container(height: screenHeight * 0.5, child: _buildTable()),
                 const SizedBox(height: 12),
                 // مکان تسهیل دار
@@ -88,6 +99,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _buildAppBar - ساخت اپ‌بار
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.primaryGreen,
@@ -96,11 +108,12 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
       centerTitle: true,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => Navigator.pop(context), // برگشت
       ),
     );
   }
 
+  // متد _buildSearchBox - ساخت باکس جستجو
   Widget _buildSearchBox() {
     return Container(
       width: 280,
@@ -121,7 +134,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
         textDirection: TextDirection.rtl,
         style: const TextStyle(fontFamily: 'Vazir', fontSize: 13),
         decoration: InputDecoration(
-          hintText: 'جستجوی مشتری...',
+          hintText: 'جستجوی مشتری...', // متن راهنما
           hintStyle: TextStyle(
             fontFamily: 'Vazir',
             color: Colors.grey[400],
@@ -135,12 +148,13 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
           ),
         ),
         onChanged: (value) {
-          setState(() {});
+          setState(() {}); // به‌روزرسانی UI
         },
       ),
     );
   }
 
+  // متد _buildTable - ساخت جدول مرسولات
   Widget _buildTable() {
     return Container(
       decoration: BoxDecoration(
@@ -182,6 +196,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
             child:
                 _deliveryData.isEmpty
                     ? Center(
+                      // نمایش پیام خالی بودن
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -215,6 +230,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _buildHeaderCell - ساخت سلول هدر
   Widget _buildHeaderCell(String title, {required int flex}) {
     return Expanded(
       flex: flex,
@@ -231,16 +247,17 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _buildTableRow - ساخت ردیف جدول
   Widget _buildTableRow(int index, Map<String, dynamic> item) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        color: index % 2 == 0 ? Colors.grey[50] : Colors.white,
+        color: index % 2 == 0 ? Colors.grey[50] : Colors.white, // رنگ‌بندی زبرا
         border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
       ),
       child: Row(
         children: [
-          _buildCell('${index + 1}', flex: 1),
+          _buildCell('${index + 1}', flex: 1), // شماره ردیف
           _buildCell(item['number'] ?? '', flex: 2),
           _buildCell(item['destination'] ?? '', flex: 3),
           _buildCell(item['date'] ?? '', flex: 2),
@@ -250,6 +267,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _buildCell - ساخت سلول جدول
   Widget _buildCell(String text, {required int flex}) {
     return Expanded(
       flex: flex,
@@ -261,6 +279,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _buildLocationSelector - ساخت انتخابگر مکان
   Widget _buildLocationSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -280,7 +299,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
           Icon(Icons.location_on, color: AppColors.primaryGreen, size: 18),
           const SizedBox(width: 6),
           Text(
-            'مکان:',
+            'مکان:', // برچسب
             style: TextStyle(
               fontFamily: 'Vazir',
               fontWeight: FontWeight.bold,
@@ -329,7 +348,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
                   onChanged: (value) {
                     setState(() {
                       _selectedLocation = value;
-                      _selectedSubLocation = null;
+                      _selectedSubLocation = null; // پاک کردن زیرمجموعه
                     });
                   },
                 ),
@@ -391,7 +410,7 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
           ElevatedButton(
             onPressed:
                 _selectedLocation != null && _selectedSubLocation != null
-                    ? _goToNearbyPage
+                    ? _goToNearbyPage // فعال اگر هر دو انتخاب شده
                     : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryPurple,
@@ -419,14 +438,15 @@ class _DeliveryParcelsPageState extends State<DeliveryParcelsPage> {
     );
   }
 
+  // متد _goToNearbyPage - ناوبری به صفحه مرسولات نزدیک
   void _goToNearbyPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder:
             (context) => DeliveryNearbyPage(
-              location: _selectedLocation!,
-              subLocation: _selectedSubLocation!,
+              location: _selectedLocation!, // مکان اصلی
+              subLocation: _selectedSubLocation!, // زیرمجموعه
             ),
       ),
     );

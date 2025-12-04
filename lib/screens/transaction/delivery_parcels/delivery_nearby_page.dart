@@ -1,15 +1,20 @@
-import 'dart:io';
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'signature_page.dart';
+// صفحه مشتریان نزدیک - نمایش لیست مشتریان در انتظار تحویل
+// مرتبط با: delivery_parcels.dart, signature_page.dart
 
+import 'dart:io'; // کتابخانه کار با فایل
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+import 'package:image_picker/image_picker.dart'; // انتخاب تصویر
+import 'signature_page.dart'; // صفحه امضا
+
+// کلاس DeliveryNearbyPage - صفحه مشتریان نزدیک
 class DeliveryNearbyPage extends StatefulWidget {
-  final String location;
-  final String subLocation;
+  final String location; // مکان اصلی
+  final String subLocation; // زیرمجموعه
 
+  // سازنده
   const DeliveryNearbyPage({
     super.key,
     required this.location,
@@ -20,9 +25,11 @@ class DeliveryNearbyPage extends StatefulWidget {
   State<DeliveryNearbyPage> createState() => _DeliveryNearbyPageState();
 }
 
+// کلاس _DeliveryNearbyPageState - state صفحه مشتریان نزدیک
 class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
-  final ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker(); // انتخابگر تصویر
 
+  // داده‌های نمونه مشتریان در انتظار
   final List<Map<String, dynamic>> _pendingDeliveries = [
     {
       'id': 1,
@@ -53,27 +60,33 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
     },
   ];
 
+  // کنترلرهای مبلغ برای هر مشتری
   final Map<int, TextEditingController> _amountControllers = {};
 
+  // بررسی پلتفرم موبایل
   bool get _isMobile {
     if (kIsWeb) return false;
     return Platform.isAndroid || Platform.isIOS;
   }
 
+  // بررسی پلتفرم دسکتاپ یا وب
   bool get _isDesktopOrWeb {
     if (kIsWeb) return true;
     return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
   }
 
   @override
+  // متد initState - مقداردهی اولیه و تنظیم جهت صفحه
   void initState() {
     super.initState();
     if (_isMobile) {
+      // تنظیم جهت صفحه به افقی
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
     }
+    // ساخت کنترلرهای مبلغ
     for (var item in _pendingDeliveries) {
       _amountControllers[item['id']] = TextEditingController(
         text: item['amount'],
@@ -82,14 +95,15 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
           title: const Text(
-            'مشتریان در انتظار',
+            'مشتریان در انتظار', // عنوان
             style: TextStyle(
               fontFamily: 'Vazir',
               color: Colors.white,
@@ -102,14 +116,14 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context), // برگشت
           ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
             children: [
-              // هدر
+              // هدر نمایش مکان
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -126,7 +140,7 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        '${widget.location} - ${widget.subLocation}',
+                        '${widget.location} - ${widget.subLocation}', // نمایش مکان
                         style: const TextStyle(
                           fontFamily: 'Vazir',
                           color: Colors.white,
@@ -134,6 +148,7 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
                         ),
                       ),
                     ),
+                    // تعداد مشتریان
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -157,7 +172,7 @@ class _DeliveryNearbyPageState extends State<DeliveryNearbyPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              // جدول
+              // جدول مشتریان
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(

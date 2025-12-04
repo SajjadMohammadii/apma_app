@@ -1,44 +1,46 @@
-// Authentication events for BLoC state management.
-// Relates to: auth_bloc.dart, auth_state.dart, login_page.dart
+// رویدادهای احراز هویت برای مدیریت state با BLoC
+// مرتبط با: auth_bloc.dart, auth_state.dart, login_page.dart
 
-import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart'; // کتابخانه مقایسه اشیاء
 
-// Base class for all authentication events.
+// کلاس انتزاعی AuthEvent - کلاس پایه برای تمام رویدادهای احراز هویت
 abstract class AuthEvent extends Equatable {
-  const AuthEvent();
+  const AuthEvent(); // سازنده
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => []; // لیست پراپرتی‌ها برای مقایسه
 }
 
-// Event triggered when user attempts to login manually.
+// کلاس LoginEvent - رویداد زمانی که کاربر تلاش می‌کند به صورت دستی وارد شود
 class LoginEvent extends AuthEvent {
-  final String username;
-  final String password;
+  final String username; // نام کاربری
+  final String password; // رمز عبور
 
+  // سازنده با نام کاربری و رمز عبور اجباری
   const LoginEvent({required this.username, required this.password});
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [username, password]; // پراپرتی‌ها برای مقایسه
 }
 
-// Event triggered when user logs out.
+// کلاس LogoutEvent - رویداد زمانی که کاربر خارج می‌شود
 class LogoutEvent extends AuthEvent {
   const LogoutEvent();
 }
 
-// Event to check current authentication status.
+// کلاس CheckAuthStatusEvent - رویداد برای بررسی وضعیت فعلی احراز هویت
 class CheckAuthStatusEvent extends AuthEvent {
   const CheckAuthStatusEvent();
 }
 
-// Event triggered for automatic login with saved credentials.
+// کلاس AutoLoginEvent - رویداد برای ورود خودکار با اعتبارنامه‌های ذخیره شده
 class AutoLoginEvent extends AuthEvent {
-  final String username;
-  final String password;
+  final String username; // نام کاربری
+  final String password; // رمز عبور
 
+  // سازنده با نام کاربری و رمز عبور اجباری
   const AutoLoginEvent({required this.username, required this.password});
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [username, password]; // پراپرتی‌ها برای مقایسه
 }

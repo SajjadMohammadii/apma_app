@@ -1,30 +1,34 @@
-import 'dart:async';
-import 'dart:io';
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/core/network/soap_client.dart';
-import 'package:apma_app/core/di/injection_container.dart';
-import 'package:apma_app/core/services/print_service.dart';
-import 'package:apma_app/screens/transaction/price_management/bloc/price_management_bloc.dart';
-import 'package:apma_app/screens/transaction/price_management/bloc/price_management_event.dart';
-import 'package:apma_app/screens/transaction/price_management/bloc/price_management_state.dart';
-import 'package:apma_app/screens/transaction/price_management/services/price_request_service.dart';
-import 'package:apma_app/screens/transaction/price_management/models/price_request_model.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/advanced_filter_dialog.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/date_field_widget.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/filter_button_widget.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/status_dropdown_widget.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/table_header_widget.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/table_row_widget.dart';
-import 'package:apma_app/screens/transaction/price_management/widgets/sub_table_widget.dart';
-import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shamsi_date/shamsi_date.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+// صفحه مدیریت بها - نمایش و مدیریت درخواست‌های قیمت
+// مرتبط با: price_management_bloc.dart, price_request_service.dart, transaction.dart
 
+import 'dart:async'; // کتابخانه async برای Timer
+import 'dart:io'; // کتابخانه کار با فایل
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/core/network/soap_client.dart'; // کلاینت SOAP
+import 'package:apma_app/core/di/injection_container.dart'; // تزریق وابستگی
+import 'package:apma_app/core/services/print_service.dart'; // سرویس پرینت
+import 'package:apma_app/screens/transaction/price_management/bloc/price_management_bloc.dart'; // بلاک
+import 'package:apma_app/screens/transaction/price_management/bloc/price_management_event.dart'; // رویدادها
+import 'package:apma_app/screens/transaction/price_management/bloc/price_management_state.dart'; // وضعیت‌ها
+import 'package:apma_app/screens/transaction/price_management/services/price_request_service.dart'; // سرویس
+import 'package:apma_app/screens/transaction/price_management/models/price_request_model.dart'; // مدل
+import 'package:apma_app/screens/transaction/price_management/widgets/advanced_filter_dialog.dart'; // دیالوگ فیلتر
+import 'package:apma_app/screens/transaction/price_management/widgets/date_field_widget.dart'; // ویجت تاریخ
+import 'package:apma_app/screens/transaction/price_management/widgets/filter_button_widget.dart'; // دکمه فیلتر
+import 'package:apma_app/screens/transaction/price_management/widgets/status_dropdown_widget.dart'; // دراپ‌داون وضعیت
+import 'package:apma_app/screens/transaction/price_management/widgets/table_header_widget.dart'; // هدر جدول
+import 'package:apma_app/screens/transaction/price_management/widgets/table_row_widget.dart'; // ردیف جدول
+import 'package:apma_app/screens/transaction/price_management/widgets/sub_table_widget.dart'; // جدول فرعی
+import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart'; // انتخابگر تاریخ
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+import 'package:flutter_bloc/flutter_bloc.dart'; // کتابخانه BLoC
+import 'package:shamsi_date/shamsi_date.dart'; // کتابخانه تاریخ شمسی
+import 'package:pdf/pdf.dart'; // کتابخانه PDF
+import 'package:pdf/widgets.dart' as pw; // ویجت‌های PDF
+
+// کلاس PriceManagementPage - صفحه مدیریت بها
 class PriceManagementPage extends StatefulWidget {
   const PriceManagementPage({super.key});
 
@@ -32,9 +36,11 @@ class PriceManagementPage extends StatefulWidget {
   State<PriceManagementPage> createState() => _PriceManagementPageState();
 }
 
+// کلاس _PriceManagementPageState - state صفحه مدیریت بها
 class _PriceManagementPageState extends State<PriceManagementPage> {
-  String selectedStatus = 'در حال بررسی';
-  Map<String, String> subFieldStatuses = {};
+  String selectedStatus = 'در حال بررسی'; // وضعیت انتخاب شده
+  Map<String, String> subFieldStatuses = {}; // وضعیت‌های فیلدهای فرعی
+  // گزینه‌های وضعیت
   final List<String> statusOptions = [
     'همه',
     'در حال بررسی',
@@ -42,66 +48,75 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     'رد شده',
   ];
 
-  Set<int> expandedRows = {};
+  Set<int> expandedRows = {}; // ردیف‌های باز شده
 
-  int? sortColumnIndex;
-  bool isAscending = true;
+  int? sortColumnIndex; // ستون مرتب‌سازی
+  bool isAscending = true; // صعودی یا نزولی
 
-  Map<int, int?> subSortColumnIndex = {};
-  Map<int, bool> subIsAscending = {};
+  Map<int, int?> subSortColumnIndex = {}; // ستون مرتب‌سازی جدول فرعی
+  Map<int, bool> subIsAscending = {}; // صعودی/نزولی جدول فرعی
 
-  String fromDate = '';
-  String toDate = '';
+  String fromDate = ''; // تاریخ از
+  String toDate = ''; // تاریخ تا
 
-  final TextEditingController _numberFilterController = TextEditingController();
+  // کنترلرهای فیلتر
+  final TextEditingController _numberFilterController =
+      TextEditingController(); // شماره
   final TextEditingController _customerFilterController =
-      TextEditingController();
-  final TextEditingController _issuerFilterController = TextEditingController();
-  final TextEditingController _keywordsController = TextEditingController();
+      TextEditingController(); // مشتری
+  final TextEditingController _issuerFilterController =
+      TextEditingController(); // صادرکننده
+  final TextEditingController _keywordsController =
+      TextEditingController(); // کلمات کلیدی
 
-  late PriceManagementBloc _bloc;
-  Timer? _autoRefreshTimer;
-  bool _isAutoRefreshEnabled = true;
+  late PriceManagementBloc _bloc; // بلاک مدیریت بها
+  Timer? _autoRefreshTimer; // تایمر بازخوانی خودکار
+  bool _isAutoRefreshEnabled = true; // فعال بودن بازخوانی خودکار
 
-  List<Map<String, dynamic>> mainData = [];
-  List<Map<String, dynamic>> filteredData = [];
-  Map<int, List<Map<String, dynamic>>> subData = {};
+  List<Map<String, dynamic>> mainData = []; // داده‌های اصلی جدول
+  List<Map<String, dynamic>> filteredData = []; // داده‌های فیلتر شده
+  Map<int, List<Map<String, dynamic>>> subData = {}; // داده‌های جدول فرعی
   Map<int, List<Map<String, dynamic>>> originalSubData =
       {}; // نگهداری داده‌های اصلی
 
   @override
+  // متد initState - مقداردهی اولیه
   void initState() {
     super.initState();
 
-    // تنظیم تاریخ سال جاری
+    // تنظیم تاریخ سال جاری شمسی
     final now = Jalali.now();
     final lastDay = Jalali(now.year, 12).monthLength;
-    fromDate = '${now.year}/01/01';
-    toDate = '${now.year}/12/$lastDay';
+    fromDate = '${now.year}/01/01'; // اول سال
+    toDate = '${now.year}/12/$lastDay'; // آخر سال
 
+    // تنظیم جهت صفحه به افقی
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
 
+    // ساخت سرویس و بلاک
     final soapClient = sl<SoapClient>();
     final service = PriceRequestService(soapClient: soapClient);
     _bloc = PriceManagementBloc(priceRequestService: service);
 
-    _loadData();
-    _startAutoRefresh();
+    _loadData(); // بارگذاری داده‌ها
+    _startAutoRefresh(); // شروع بازخوانی خودکار
   }
 
+  // متد _startAutoRefresh - شروع بازخوانی خودکار هر ۵ ثانیه
   void _startAutoRefresh() {
     _autoRefreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_isAutoRefreshEnabled) {
-        _loadDataSilently();
+        _loadDataSilently(); // بارگذاری بدون نمایش لودینگ
       }
     });
   }
 
+  // متد _loadDataSilently - بارگذاری داده‌ها بدون نمایش لودینگ
   void _loadDataSilently() {
-    final fromDateGregorian = _persianToGregorian(fromDate);
+    final fromDateGregorian = _persianToGregorian(fromDate); // تبدیل به میلادی
     final toDateGregorian = _persianToGregorian(toDate);
 
     _bloc.add(
@@ -114,6 +129,7 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     );
   }
 
+  // متد _loadData - بارگذاری داده‌ها
   void _loadData() {
     // تبدیل تاریخ‌های شمسی به میلادی برای ارسال به سرور
     final fromDateGregorian = _persianToGregorian(fromDate);
@@ -129,6 +145,7 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     );
   }
 
+  // متد _persianToGregorian - تبدیل تاریخ شمسی به میلادی
   String _persianToGregorian(String persianDate) {
     try {
       final parts = persianDate.split('/');
@@ -143,6 +160,7 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     return persianDate.replaceAll('/', '');
   }
 
+  // متد _gregorianToPersian - تبدیل تاریخ میلادی به شمسی
   String _gregorianToPersian(String gregorianDate) {
     try {
       final g = Gregorian(
@@ -156,6 +174,7 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     return gregorianDate;
   }
 
+  // متد _persianDateToComparable - تبدیل تاریخ شمسی به عدد قابل مقایسه
   int _persianDateToComparable(String d) {
     try {
       final parts = d.split('/');
@@ -172,8 +191,10 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
   }
 
   @override
+  // متد dispose - آزادسازی منابع
   void dispose() {
-    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer?.cancel(); // لغو تایمر
+    // برگرداندن جهت صفحه به عمودی
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -182,10 +203,11 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
     _customerFilterController.dispose();
     _issuerFilterController.dispose();
     _keywordsController.dispose();
-    _bloc.close();
+    _bloc.close(); // بستن بلاک
     super.dispose();
   }
 
+  // متد _convertApiDataToUIFormat - تبدیل داده‌های API به فرمت UI
   void _convertApiDataToUIFormat(Map<String, List<PriceRequestModel>> grouped) {
     mainData.clear();
     subData.clear();
@@ -196,14 +218,16 @@ class _PriceManagementPageState extends State<PriceManagementPage> {
       if (items.isNotEmpty) {
         final first = items.first;
 
+        // افزودن ردیف اصلی
         mainData.add({
           'id': id,
-          'date': _gregorianToPersian(first.orderDate),
-          'number': orderNumber,
-          'customer': first.sherkat,
-          'issuer': first.fullPersonName,
+          'date': _gregorianToPersian(first.orderDate), // تاریخ شمسی
+          'number': orderNumber, // شماره سفارش
+          'customer': first.sherkat, // مشتری
+          'issuer': first.fullPersonName, // صادرکننده
         });
 
+        // افزودن ردیف‌های فرعی
         subData[id] =
             items.map((item) {
               // استفاده از وضعیت ذخیره شده در subFieldStatuses یا وضعیت سرور

@@ -1,6 +1,10 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
+// صفحه اعلان‌ها - نمایش لیست اعلان‌های کاربر
+// مرتبط با: home_page.dart, messages_page.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس NotificationsPage - صفحه اعلان‌ها
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
@@ -8,31 +12,35 @@ class NotificationsPage extends StatefulWidget {
   State<NotificationsPage> createState() => _NotificationsPageState();
 }
 
+// کلاس _NotificationsPageState - state صفحه اعلان‌ها
 class _NotificationsPageState extends State<NotificationsPage> {
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController =
+      TextEditingController(); // کنترلر جستجو
 
   @override
+  // متد dispose - آزادسازی کنترلر
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه اعلان‌ها
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
+        backgroundColor: AppColors.backgroundColor, // رنگ پس‌زمینه
         appBar: AppBar(
           title: const Text(
-            'اعلان‌ها',
+            'اعلان‌ها', // عنوان صفحه
             style: TextStyle(fontFamily: 'Vazir', fontWeight: FontWeight.bold),
           ),
           elevation: 0,
           backgroundColor: AppColors.primaryGreen,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context), // برگشت
           ),
           centerTitle: true,
         ),
@@ -44,6 +52,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // فیلد جستجو
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -52,12 +61,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'جستجو',
+                      hintText: 'جستجو', // متن راهنما
                       hintStyle: TextStyle(
                         color: Colors.grey[500],
                         fontFamily: 'Vazir',
                       ),
-                      suffixIcon: const Icon(Icons.search),
+                      suffixIcon: const Icon(Icons.search), // آیکون جستجو
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
@@ -69,11 +78,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       filled: true,
                       fillColor: Colors.white,
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.right, // راست‌چین
                     style: TextStyle(fontFamily: 'Vazir'),
                   ),
                 ),
                 SizedBox(height: 40),
+                // کارت اعلان - بخش بالا (متن اعلان)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     vertical: 20,
@@ -87,7 +97,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                   ),
                   child: const Text(
-                    "کاربر name@ وارد اپلیکیشن شد",
+                    "کاربر name@ وارد اپلیکیشن شد", // متن اعلان نمونه
                     textAlign: TextAlign.start,
                     style: TextStyle(
                       fontSize: 16,
@@ -97,12 +107,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                 ),
 
+                // کارت اعلان - بخش پایین (تاریخ و زمان)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     vertical: 10,
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
+                    // گرادیانت بنفش
                     gradient: const LinearGradient(
                       colors: [AppColors.primaryPurple, Color(0xFF8882B2)],
                       begin: Alignment.centerRight,
@@ -117,7 +129,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "27 آبان 1404 - 11:30",
+                        "27 آبان 1404 - 11:30", // تاریخ و زمان اعلان
                         style: TextStyle(color: Colors.white, fontSize: 14),
                       ),
                     ],

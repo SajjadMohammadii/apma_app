@@ -1,6 +1,10 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
+// صفحه پیام‌ها - نمایش و مدیریت پیام‌های کاربر
+// مرتبط با: home_page.dart, notification_page.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+
+// کلاس MessagesPage - صفحه نمایش پیام‌ها
 class MessagesPage extends StatefulWidget {
   const MessagesPage({super.key});
 
@@ -8,31 +12,35 @@ class MessagesPage extends StatefulWidget {
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
+// کلاس _MessagesPageState - state صفحه پیام‌ها
 class _MessagesPageState extends State<MessagesPage> {
+  // لیست پیام‌های نمونه
   final List<ChatMessage> _messages = [
     ChatMessage(
-      senderName: 'علی احمدی',
-      message: 'درخواست مرخصی از تاریخ 1403/09/10 تا 1403/09/12 دارم',
-      time: '09:32',
-      date: '1403/09/05',
-      isFromMe: false,
-      hasReply: false,
-      messageType: MessageType.leaveRequest,
+      senderName: 'علی احمدی', // نام فرستنده
+      message:
+          'درخواست مرخصی از تاریخ 1403/09/10 تا 1403/09/12 دارم', // متن پیام
+      time: '09:32', // زمان
+      date: '1403/09/05', // تاریخ
+      isFromMe: false, // آیا از من است
+      hasReply: false, // آیا پاسخ دارد
+      messageType: MessageType.leaveRequest, // نوع پیام
     ),
   ];
 
   @override
+  // متد build - ساخت رابط کاربری صفحه پیام‌ها
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // راست به چپ
       child: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
+        backgroundColor: AppColors.backgroundColor, // رنگ پس‌زمینه
         appBar: AppBar(
           backgroundColor: AppColors.primaryGreen,
           elevation: 0,
           centerTitle: true,
           title: const Text(
-            'پیام ها',
+            'پیام ها', // عنوان صفحه
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -42,36 +50,38 @@ class _MessagesPageState extends State<MessagesPage> {
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context), // برگشت
           ),
         ),
         body:
             _messages.isEmpty
-                ? _buildEmptyState()
+                ? _buildEmptyState() // نمایش وضعیت خالی
                 : ListView.builder(
+                  // لیست پیام‌ها
                   padding: const EdgeInsets.all(16),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
-                    return _buildChatBubble(_messages[index]);
+                    return _buildChatBubble(_messages[index]); // ساخت حباب چت
                   },
                 ),
       ),
     );
   }
 
+  // متد _buildEmptyState - ساخت ویجت وضعیت خالی
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.chat_bubble_outline,
+            Icons.chat_bubble_outline, // آیکون پیام
             size: 80,
             color: AppColors.textSecondary.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
-            'پیامی وجود ندارد',
+            'پیامی وجود ندارد', // متن وضعیت خالی
             style: TextStyle(
               color: AppColors.textSecondary.withOpacity(0.7),
               fontSize: 16,
@@ -83,15 +93,18 @@ class _MessagesPageState extends State<MessagesPage> {
     );
   }
 
+  // متد _buildChatBubble - ساخت حباب پیام
   Widget _buildChatBubble(ChatMessage message) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment:
             message.isFromMe
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
+                ? CrossAxisAlignment
+                    .end // پیام من: راست‌چین
+                : CrossAxisAlignment.start, // پیام دیگران: چپ‌چین
         children: [
+          // نمایش نام فرستنده اگر از من نیست
           if (!message.isFromMe)
             Padding(
               padding: const EdgeInsets.only(right: 12, bottom: 4),
@@ -112,6 +125,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // آواتار فرستنده (اگر از من نیست)
               if (!message.isFromMe) ...[
                 CircleAvatar(
                   radius: 20,
@@ -124,12 +138,16 @@ class _MessagesPageState extends State<MessagesPage> {
                 ),
                 const SizedBox(width: 8),
               ],
+              // محتوای پیام
               Flexible(
                 child: Container(
                   constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.7,
+                    maxWidth:
+                        MediaQuery.of(context).size.width *
+                        0.7, // حداکثر عرض ۷۰٪
                   ),
                   decoration: BoxDecoration(
+                    // گرادیانت برای پیام‌های من
                     gradient:
                         message.isFromMe
                             ? const LinearGradient(
@@ -141,7 +159,11 @@ class _MessagesPageState extends State<MessagesPage> {
                               end: Alignment.bottomLeft,
                             )
                             : null,
-                    color: message.isFromMe ? null : Colors.white,
+                    color:
+                        message.isFromMe
+                            ? null
+                            : Colors.white, // رنگ پیام دیگران
+                    // گوشه‌های گرد با استایل متفاوت برای هر طرف
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -166,6 +188,7 @@ class _MessagesPageState extends State<MessagesPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // نمایش برچسب نوع پیام
                       if (message.messageType != MessageType.normal)
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -207,6 +230,7 @@ class _MessagesPageState extends State<MessagesPage> {
                             ],
                           ),
                         ),
+                      // متن پیام
                       Text(
                         message.message,
                         style: TextStyle(
@@ -220,6 +244,7 @@ class _MessagesPageState extends State<MessagesPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      // زمان پیام
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

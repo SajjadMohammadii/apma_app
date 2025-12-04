@@ -1,11 +1,16 @@
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
+// صفحه پیش‌نمایش دوربین - گرفتن عکس از چک
+// مرتبط با: customer.dart, bank.dart
 
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:camera/camera.dart'; // کتابخانه دوربین
+
+// کلاس CameraPreviewScreen - صفحه پیش‌نمایش دوربین
 class CameraPreviewScreen extends StatefulWidget {
-  final CameraDescription camera;
-  final Function(String) onCapture;
+  final CameraDescription camera; // توصیف دوربین
+  final Function(String) onCapture; // callback پس از گرفتن عکس
 
+  // سازنده
   const CameraPreviewScreen({
     super.key,
     required this.camera,
@@ -16,39 +21,48 @@ class CameraPreviewScreen extends StatefulWidget {
   State<CameraPreviewScreen> createState() => _CameraPreviewScreenState();
 }
 
+// کلاس _CameraPreviewScreenState - state صفحه دوربین
 class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  late CameraController _controller; // کنترلر دوربین
+  late Future<void> _initializeControllerFuture; // Future مقداردهی
 
   @override
+  // متد initState - مقداردهی اولیه دوربین
   void initState() {
     super.initState();
-    _controller = CameraController(widget.camera, ResolutionPreset.high);
+    _controller = CameraController(
+      widget.camera,
+      ResolutionPreset.high,
+    ); // کیفیت بالا
     _initializeControllerFuture = _controller.initialize();
   }
 
   @override
+  // متد dispose - آزادسازی منابع دوربین
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  // متد _takePicture - گرفتن عکس
   Future<void> _takePicture() async {
-    await _initializeControllerFuture;
-    final image = await _controller.takePicture();
+    await _initializeControllerFuture; // انتظار برای آماده شدن
+    final image = await _controller.takePicture(); // گرفتن عکس
     if (!mounted) return;
 
-    Navigator.pop(context);
-    widget.onCapture(image.path);
+    Navigator.pop(context); // بستن صفحه
+    widget.onCapture(image.path); // ارسال مسیر عکس
   }
 
   @override
+  // متد build - ساخت رابط کاربری دوربین
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black, // پس‌زمینه مشکی
       body: FutureBuilder(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
+          // نمایش لودینگ تا آماده شدن دوربین
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(
               child: CircularProgressIndicator(color: Colors.white),
@@ -57,12 +71,13 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
 
           return Stack(
             children: [
+              // پیش‌نمایش دوربین
               SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: CameraPreview(_controller),
               ),
-              // چارچوب
+              // چارچوب راهنما برای قرار دادن چک
               Center(
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.85,
@@ -73,7 +88,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                   ),
                 ),
               ),
-              // راهنما
+              // متن راهنما
               Positioned(
                 top: 60,
                 left: 0,
@@ -89,7 +104,7 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      'چک را در چارچوب قرار دهید',
+                      'چک را در چارچوب قرار دهید', // متن راهنما
                       style: TextStyle(
                         fontFamily: 'Vazir',
                         color: Colors.white,
@@ -99,14 +114,14 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                   ),
                 ),
               ),
-              // دکمه عکس
+              // دکمه گرفتن عکس
               Positioned(
                 bottom: 40,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: GestureDetector(
-                    onTap: _takePicture,
+                    onTap: _takePicture, // گرفتن عکس با کلیک
                     child: Container(
                       width: 70,
                       height: 70,
@@ -122,13 +137,13 @@ class _CameraPreviewScreenState extends State<CameraPreviewScreen> {
                   ),
                 ),
               ),
-              // دکمه بستن
+              // دکمه بستن صفحه
               Positioned(
                 top: 40,
                 left: 20,
                 child: IconButton(
                   icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(context), // برگشت
                 ),
               ),
             ],

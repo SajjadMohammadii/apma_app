@@ -1,28 +1,37 @@
-// Application-wide constant values and configurations.
-// Relates to: app_string.dart, soap_client.dart
+// مقادیر ثابت و تنظیمات سراسری برنامه
+// مرتبط با: app_string.dart, soap_client.dart
 
+// کلاس AppConstants - ثابت‌های عددی و تنظیماتی برنامه
 class AppConstants {
-  // Durations
-  static const Duration splashDuration = Duration(seconds: 3);
-  static const Duration animationDuration = Duration(milliseconds: 300);
+  // مدت زمان‌ها
+  static const Duration splashDuration = Duration(
+    seconds: 3,
+  ); // مدت نمایش صفحه اسپلش
+  static const Duration animationDuration = Duration(
+    milliseconds: 300,
+  ); // مدت انیمیشن‌ها
 
-  // Sizes
-  static const double borderRadius = 12.0;
-  static const double buttonHeight = 56.0;
-  static const double inputHeight = 56.0;
+  // اندازه‌ها
+  static const double borderRadius = 12.0; // شعاع گوشه‌ها
+  static const double buttonHeight = 56.0; // ارتفاع دکمه‌ها
+  static const double inputHeight = 56.0; // ارتفاع فیلدهای ورودی
 
-  // Padding
-  static const double paddingSmall = 8.0;
-  static const double paddingMedium = 16.0;
-  static const double paddingLarge = 24.0;
-  static const double paddingXLarge = 32.0;
+  // پدینگ‌ها
+  static const double paddingSmall = 8.0; // پدینگ کوچک
+  static const double paddingMedium = 16.0; // پدینگ متوسط
+  static const double paddingLarge = 24.0; // پدینگ بزرگ
+  static const double paddingXLarge = 32.0; // پدینگ خیلی بزرگ
 
-  // Logo
-  static const double logoWidth = 200.0;
-  static const double logoHeight = 80.0;
+  // لوگو
+  static const double logoWidth = 200.0; // عرض لوگو
+  static const double logoHeight = 80.0; // ارتفاع لوگو
 
-  // API (for future use)
-  static const String baseUrl = 'https://api.apmaco.com';
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  // API (برای استفاده آینده)
+  static const String baseUrl = 'https://api.apmaco.com'; // آدرس پایه API
+  static const Duration connectionTimeout = Duration(
+    seconds: 30,
+  ); // timeout اتصال
+  static const Duration receiveTimeout = Duration(
+    seconds: 30,
+  ); // timeout دریافت
 }

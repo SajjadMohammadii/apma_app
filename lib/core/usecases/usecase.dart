@@ -1,14 +1,17 @@
-// Base use case interface following Clean Architecture principles.
-// Relates to: login_usecase.dart, auth_repository.dart
+// رابط پایه یوزکیس بر اساس اصول معماری تمیز (Clean Architecture)
+// مرتبط با: login_usecase.dart, auth_repository.dart
 
-import 'package:apma_app/core/errors/failures.dart';
-import 'package:dartz/dartz.dart';
+import 'package:apma_app/core/errors/failures.dart'; // کلاس‌های خطا
+import 'package:dartz/dartz.dart'; // کتابخانه Either
 
-/// Generic use case interface for business logic operations.
+/// کلاس انتزاعی UseCase - رابط عمومی یوزکیس برای عملیات منطق تجاری
+/// Type: نوع خروجی یوزکیس
+/// Params: نوع پارامترهای ورودی
 abstract class UseCase<Type, Params> {
-  // Executes the use case with given parameters.
+  // متد call - اجرای یوزکیس با پارامترهای داده شده
+  // برمی‌گرداند: Either شامل Failure (در صورت خطا) یا Type (در صورت موفقیت)
   Future<Either<Failure, Type>> call(Params params);
 }
 
-// Placeholder for use cases that don't require parameters.
+// کلاس NoParams - جایگزین برای یوزکیس‌هایی که پارامتر نیاز ندارند
 class NoParams {}

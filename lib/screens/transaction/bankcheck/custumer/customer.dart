@@ -1,15 +1,19 @@
-import 'dart:io';
-import 'package:apma_app/core/constants/app_colors.dart';
-import 'package:apma_app/screens/transaction/bankcheck/camera_preview_screen.dart';
-import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shamsi_date/shamsi_date.dart';
-import 'package:flutter/services.dart';
+// صفحه چک مشتری - ثبت و مدیریت چک‌های مشتری
+// مرتبط با: bank_check.dart, camera_preview_screen.dart
 
+import 'dart:io'; // کتابخانه کار با فایل
+import 'package:apma_app/core/constants/app_colors.dart'; // رنگ‌های برنامه
+import 'package:apma_app/screens/transaction/bankcheck/camera_preview_screen.dart'; // صفحه دوربین
+import 'package:apma_app/shared/widgets/persian_date_picker/persian_date_picker_dialog.dart'; // انتخابگر تاریخ
+import 'package:flutter/foundation.dart'; // ابزارهای پایه
+import 'package:flutter/material.dart'; // ویجت‌های متریال
+import 'package:camera/camera.dart'; // کتابخانه دوربین
+import 'package:image_picker/image_picker.dart'; // انتخاب تصویر
+import 'package:permission_handler/permission_handler.dart'; // مدیریت دسترسی‌ها
+import 'package:shamsi_date/shamsi_date.dart'; // تاریخ شمسی
+import 'package:flutter/services.dart'; // سرویس‌های سیستم
+
+// کلاس CustomerPage - صفحه چک مشتری
 class CustomerPage extends StatefulWidget {
   const CustomerPage({super.key});
 
@@ -17,43 +21,54 @@ class CustomerPage extends StatefulWidget {
   State<CustomerPage> createState() => _CustomerPageState();
 }
 
+// کلاس _CustomerPageState - state صفحه چک مشتری
 class _CustomerPageState extends State<CustomerPage> {
-  String checkActionType = "دریافت چک";
-  String? imagePath;
-  List<CameraDescription>? _cameras;
-  final ImagePicker _picker = ImagePicker();
+  String checkActionType = "دریافت چک"; // نوع عملیات چک
+  String? imagePath; // مسیر تصویر چک
+  List<CameraDescription>? _cameras; // لیست دوربین‌ها
+  final ImagePicker _picker = ImagePicker(); // انتخابگر تصویر
 
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController numberController = TextEditingController();
-  final TextEditingController sayadiController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController companyController = TextEditingController();
+  // کنترلرهای فیلدها
+  final TextEditingController dateController = TextEditingController(); // تاریخ
+  final TextEditingController numberController =
+      TextEditingController(); // شماره چک
+  final TextEditingController sayadiController =
+      TextEditingController(); // صیادی
+  final TextEditingController priceController = TextEditingController(); // مبلغ
+  final TextEditingController companyController =
+      TextEditingController(); // شرکت
 
+  // فرمت‌کننده جداکننده هزارگان
   final ThousandsSeparatorInputFormatter _amountFormatter =
       ThousandsSeparatorInputFormatter();
 
+  // بررسی پلتفرم موبایل
   bool get _isMobile {
     if (kIsWeb) return false;
     return Platform.isAndroid || Platform.isIOS;
   }
 
+  // بررسی پلتفرم دسکتاپ یا وب
   bool get _isDesktopOrWeb {
     if (kIsWeb) return true;
     return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
   }
 
   @override
+  // متد initState - مقداردهی اولیه
   void initState() {
     super.initState();
-    _setTodayDate();
+    _setTodayDate(); // تنظیم تاریخ امروز
   }
 
+  // متد _setTodayDate - تنظیم تاریخ امروز شمسی
   void _setTodayDate() {
     final now = Jalali.now();
     dateController.text =
         '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
   }
 
+  // متد _openDatePicker - باز کردن انتخابگر تاریخ
   Future<void> _openDatePicker() async {
     final selectedDate = await PersianDatePickerDialog.show(
       context,
@@ -64,6 +79,7 @@ class _CustomerPageState extends State<CustomerPage> {
     }
   }
 
+  // متد _openAttachment - باز کردن پیوست
   Future<void> _openAttachment() async {
     if (_isDesktopOrWeb) {
       // فقط گزینه فایل در دسکتاپ و وب
@@ -77,6 +93,7 @@ class _CustomerPageState extends State<CustomerPage> {
     }
   }
 
+  // متد _showAttachmentPicker - نمایش انتخابگر پیوست
   void _showAttachmentPicker() {
     showModalBottomSheet(
       context: context,
@@ -96,6 +113,7 @@ class _CustomerPageState extends State<CustomerPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // دستگیره کشیدن
                   Container(
                     width: 40,
                     height: 4,
@@ -106,7 +124,7 @@ class _CustomerPageState extends State<CustomerPage> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'انتخاب فایل پیوست',
+                    'انتخاب فایل پیوست', // عنوان
                     style: TextStyle(
                       fontFamily: 'Vazir',
                       fontWeight: FontWeight.bold,
@@ -114,6 +132,7 @@ class _CustomerPageState extends State<CustomerPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // گزینه‌های دوربین و گالری
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -148,10 +167,11 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _buildPickerOption - ساخت گزینه انتخابگر
   Widget _buildPickerOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
+    required IconData icon, // آیکون
+    required String label, // برچسب
+    required VoidCallback onTap, // callback کلیک
   }) {
     return InkWell(
       onTap: onTap,
@@ -179,13 +199,15 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _openCamera - باز کردن دوربین
   Future<void> _openCamera() async {
-    final status = await Permission.camera.request();
+    final status = await Permission.camera.request(); // درخواست دسترسی
     if (!status.isGranted) return;
 
-    _cameras = await availableCameras();
+    _cameras = await availableCameras(); // دریافت دوربین‌ها
     if (_cameras == null || _cameras!.isEmpty) return;
 
+    // ناوبری به صفحه دوربین
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -198,11 +220,13 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _saveData - ذخیره اطلاعات
   void _saveData() {
     print("اطلاعات مشتری ذخیره شد");
   }
 
   @override
+  // متد build - ساخت رابط کاربری صفحه
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -212,6 +236,7 @@ class _CustomerPageState extends State<CustomerPage> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
+                // دکمه آپلود چک
                 ElevatedButton(
                   onPressed: _openAttachment,
                   style: ElevatedButton.styleFrom(
@@ -235,7 +260,9 @@ class _CustomerPageState extends State<CustomerPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                if (imagePath != null) _uploadedFileBox(),
+                if (imagePath != null)
+                  _uploadedFileBox(), // نمایش فایل آپلود شده
+                // فیلدهای فرم
                 _buildDropdownField("نوع چک", checkActionType, [
                   "دریافت چک",
                   "ارسال چک",
@@ -253,17 +280,18 @@ class _CustomerPageState extends State<CustomerPage> {
             ),
           ),
         ),
-        _saveButton(),
+        _saveButton(), // دکمه ذخیره
       ],
     );
   }
 
+  // متد _buildDropdownField - ساخت فیلد دراپ‌داون
   Widget _buildDropdownField(String label, String value, List<String> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          label, // برچسب
           style: const TextStyle(
             fontFamily: "Vazir",
             fontSize: 13,
@@ -307,12 +335,13 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _buildField - ساخت فیلد متنی
   Widget _buildField(
-    String label,
-    TextEditingController controller, {
-    bool isNumeric = false,
-    bool isDate = false,
-    bool isAmount = false,
+    String label, // برچسب
+    TextEditingController controller, { // کنترلر
+    bool isNumeric = false, // آیا عددی
+    bool isDate = false, // آیا تاریخ
+    bool isAmount = false, // آیا مبلغ
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,7 +365,7 @@ class _CustomerPageState extends State<CustomerPage> {
           child:
               isDate
                   ? InkWell(
-                    onTap: _openDatePicker,
+                    onTap: _openDatePicker, // باز کردن انتخابگر تاریخ
                     child: IgnorePointer(
                       child: TextField(
                         controller: controller,
@@ -364,9 +393,11 @@ class _CustomerPageState extends State<CustomerPage> {
                             : TextInputType.text,
                     inputFormatters:
                         isAmount
-                            ? [_amountFormatter]
+                            ? [_amountFormatter] // فرمت مبلغ
                             : isNumeric
-                            ? [FilteringTextInputFormatter.digitsOnly]
+                            ? [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ] // فقط عدد
                             : [],
                     style: const TextStyle(fontFamily: "Vazir", fontSize: 15),
                     decoration: const InputDecoration(
@@ -383,12 +414,13 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _uploadedFileBox - نمایش باکس فایل آپلود شده
   Widget _uploadedFileBox() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "فایل چک",
+          "فایل چک", // عنوان
           style: TextStyle(
             fontFamily: "Vazir",
             fontSize: 13,
@@ -410,7 +442,7 @@ class _CustomerPageState extends State<CustomerPage> {
               SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "فایل چک آپلود شد",
+                  "فایل چک آپلود شد", // پیام موفقیت
                   style: TextStyle(fontFamily: "Vazir", fontSize: 15),
                 ),
               ),
@@ -422,13 +454,14 @@ class _CustomerPageState extends State<CustomerPage> {
     );
   }
 
+  // متد _saveButton - ساخت دکمه ذخیره
   Widget _saveButton() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _saveData,
+          onPressed: _saveData, // ذخیره
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryPurple,
             foregroundColor: Colors.white,
@@ -451,17 +484,20 @@ class _CustomerPageState extends State<CustomerPage> {
   }
 }
 
+// کلاس ThousandsSeparatorInputFormatter - فرمت‌کننده جداکننده هزارگان
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {
   @override
+  // متد formatEditUpdate - فرمت کردن ورودی
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     if (newValue.text.isEmpty) return newValue;
 
-    String raw = newValue.text.replaceAll(",", "");
-    if (int.tryParse(raw) == null) return oldValue;
+    String raw = newValue.text.replaceAll(",", ""); // حذف کاماها
+    if (int.tryParse(raw) == null) return oldValue; // اعتبارسنجی عدد
 
+    // اضافه کردن جداکننده هزارگان
     String formatted = raw.replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => "${m[1]},",
